@@ -37,7 +37,7 @@ import './property-range-document.js';
  * @appliesMixin PropertyDocumentMixin
  */
 class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
-  static get styles() {
+  get styles() {
     return [
       markdownStyles,
       css`:host {
@@ -650,7 +650,7 @@ class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
   }
 
   render() {
-    return html`
+    return html`<style>${this.styles}</style>
     ${this._headerTemplate()}
     <div class="property-traits">
       ${this._getTypeNameTemplate()}

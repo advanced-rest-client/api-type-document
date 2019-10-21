@@ -19,7 +19,7 @@ import { PropertyDocumentMixin } from './property-document-mixin.js';
  * @appliesMixin AmfHelperMixin
  */
 class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
-  static get styles() {
+  get styles() {
     return css`:host {
       display: block;
       font-size: var(--arc-font-body1-font-size);
@@ -624,7 +624,7 @@ class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     parts += 'code-content-action-button-disabled content-action-button-active, ';
     parts += 'code-content-action-button-active, code-wrapper, example-code-wrapper, markdown-html';
     const mediaTypes = this.mediaTypes || [];
-    return html`
+    return html`<style>${this.styles}</style>
     ${this.aware ?
       html`<raml-aware @api-changed="${this._apiChangedHandler}" scope="${this.aware}"></raml-aware>` : undefined}
     <section class="examples" ?hidden="${!this._renderMainExample}">

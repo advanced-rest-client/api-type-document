@@ -28,7 +28,7 @@ import './api-type-document.js';
  * @appliesMixin PropertyDocumentMixin
  */
 class PropertyRangeDocument extends PropertyDocumentMixin(LitElement) {
-  static get styles() {
+  get styles() {
     return css`:host {
       display: block;
     }
@@ -288,7 +288,7 @@ class PropertyRangeDocument extends PropertyDocumentMixin(LitElement) {
 
   render() {
     const range = this.range;
-    return html`
+    return html`<style>${this.styles}</style>
     <api-annotation-document ?compatibility="${this.compatibility}" .amf="${this.amf}" .shape="${range}"></api-annotation-document>
     ${this._hasProperty(range, this.ns.w3.shacl.defaultValueStr) ?
       this._listItemTemplate('Default value', 'This value is used as a default value', this.ns.w3.shacl.defaultValueStr) :
