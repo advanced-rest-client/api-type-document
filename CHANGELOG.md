@@ -1657,3 +1657,23 @@
 
 
 
+## 4.0.2 (2019-11-07)
+
+
+### Bug Fixes
+
+* fixes APIC-282 - amf_inline_type in proeprty name ([bca6251](https://github.com/advanced-rest-client/api-type-document/commit/bca62513aa8afce4afcde3e7bc6489b8eb2e00f6))
+* fixes APIC-289 - OAS paramName proeprty ([70d5190](https://github.com/advanced-rest-client/api-type-document/commit/70d51900333c6318b7eede8cda1ccce37cce811a))
+* fixing setting `rawonly` on example generator ([55c837a](https://github.com/advanced-rest-client/api-type-document/commit/55c837a751717e499e5dca2f2489676b717489f0))
+* fixing type fragment example rendering ([493b5eb](https://github.com/advanced-rest-client/api-type-document/commit/493b5eb1a9b3cd283491b061717ff6f5333a9228))
+* **a11y:** fixing contrast issue on a property type's label ([853103b](https://github.com/advanced-rest-client/api-type-document/commit/853103ba8f1270df1a0bf41c6fcafbee46706c08))
+
+
+### Features
+
+* adding graph internal linking ([eff36fc](https://github.com/advanced-rest-client/api-type-document/commit/eff36fcb85ea9db425f60768b494883289cf6512))
+* complex types are now not rendered by default until toggled ([02ddfec](https://github.com/advanced-rest-client/api-type-document/commit/02ddfece5c14a1fad21ceef885b39d43b8015ee8))
+* simplifying array property description ([e7b605f](https://github.com/advanced-rest-client/api-type-document/commit/e7b605f6523d085cebc0ec292801f7db2b435de5))
+
+
+

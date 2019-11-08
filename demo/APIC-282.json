@@ -399,7 +399,7 @@
 }
 ],
 "amf://id#1": {
-"http://a.ml/vocabularies/core#name": [
+"http://a.ml/vocabularies/core#extensionName": [
 {
 "@value": "deprecated"
 }
@@ -689,7 +689,7 @@
 }
 ],
 "amf://id#3": {
-"http://a.ml/vocabularies/core#name": [
+"http://a.ml/vocabularies/core#extensionName": [
 {
 "@value": "annotationTest"
 }
@@ -1573,7 +1573,7 @@
 }
 ],
 "amf://id#1": {
-"http://a.ml/vocabularies/core#name": [
+"http://a.ml/vocabularies/core#extensionName": [
 {
 "@value": "deprecated"
 }
@@ -2406,7 +2406,7 @@
 }
 ],
 "amf://id#3": {
-"http://a.ml/vocabularies/core#name": [
+"http://a.ml/vocabularies/core#extensionName": [
 {
 "@value": "annotationTest"
 }

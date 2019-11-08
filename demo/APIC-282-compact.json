@@ -399,7 +399,7 @@
 }
 ],
 "amf://id#1": {
-"core:name": [
+"core:extensionName": [
 {
 "@value": "deprecated"
 }
@@ -689,7 +689,7 @@
 }
 ],
 "amf://id#3": {
-"core:name": [
+"core:extensionName": [
 {
 "@value": "annotationTest"
 }
@@ -1573,7 +1573,7 @@
 }
 ],
 "amf://id#1": {
-"core:name": [
+"core:extensionName": [
 {
 "@value": "deprecated"
 }
@@ -2406,7 +2406,7 @@
 }
 ],
 "amf://id#3": {
-"core:name": [
+"core:extensionName": [
 {
 "@value": "annotationTest"
 }
