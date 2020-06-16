@@ -121,6 +121,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
        * is currently rendered.
        */
       opened: { type: Boolean },
+      renderReadOnly: { type: Boolean }
     };
   }
 
@@ -517,6 +518,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     return html`<api-type-document
       class="children complex"
       .amf="${this.amf}"
+      ?renderReadOnly="${this.renderReadOnly}"
       .type="${range}"
       .parentTypeName="${parentTypeName}"
       ?narrow="${this.narrow}"
