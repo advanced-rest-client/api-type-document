@@ -778,16 +778,14 @@ describe('<api-type-document>', function () {
   ].forEach(([name, compact]) => {
     describe(name, () => {
       let element;
-      let amf;
 
       beforeEach(async () => {
         element = await basicFixture();
-        amf = await AmfLoader.load(compact, newOas3Types);
       });
 
       it('should represent type as oneOf', async () => {
+        const [amf, type] = await AmfLoader.loadType('Pet', compact, newOas3Types)
         element.amf = amf;
-        const [_, type] = await AmfLoader.loadType('Pet', compact, newOas3Types)
         element.type = type;
         await aTimeout(0);
         assert.lengthOf(element.oneOfTypes, 3);
@@ -795,13 +793,32 @@ describe('<api-type-document>', function () {
       });
 
       it('changes selectedOneOf when button clicked', async () => {
+        const [amf, type] = await AmfLoader.loadType('Pet', compact, newOas3Types)
         element.amf = amf;
-        const [_, type] = await AmfLoader.loadType('Pet', compact, newOas3Types)
         element.type = type;
         await aTimeout(0);
         assert.equal(element.selectedOneOf, 0);
         element.shadowRoot.querySelectorAll('.one-of-toggle')[1].click()
         assert.equal(element.selectedOneOf, 1);
+      });
+
+      it('should represent type as anyOf', async () => {
+        const [amf, type] = await AmfLoader.loadType('Monster', compact, newOas3Types)
+        element.amf = amf;
+        element.type = type;
+        await aTimeout(0);
+        assert.lengthOf(element.anyOfTypes, 3);
+        assert.equal(element.isAnyOf, true);
+      });
+
+      it('changes selectedAnyOf when button clicked', async () => {
+        const [amf, type] = await AmfLoader.loadType('Monster', compact, newOas3Types)
+        element.amf = amf;
+        element.type = type;
+        await aTimeout(0);
+        assert.equal(element.selectedAnyOf, 0);
+        element.shadowRoot.querySelectorAll('.any-of-toggle')[1].click()
+        assert.equal(element.selectedAnyOf, 1);
       });
     });
   });
