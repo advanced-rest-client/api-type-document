@@ -28,6 +28,11 @@ components:
       required:
         - name
         - petType
+    Monster:
+      anyOf:
+        - $ref: '#/components/schemas/Cat'
+        - $ref: '#/components/schemas/Dog'
+        - $ref: '#/components/schemas/Tiger'
     Cat:  ## "Cat" will be used as the discriminator value
       description: A representation of a cat
       allOf:
