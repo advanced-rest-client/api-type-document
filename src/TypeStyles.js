@@ -55,7 +55,8 @@ export default css`
     );
   }
 
-  .union-toggle {
+  .union-toggle,
+  .one-of-toggle {
     outline: none;
     background-color: var(
       --api-type-document-union-button-background-color,
@@ -67,7 +68,8 @@ export default css`
     border-style: solid;
   }
 
-  .union-toggle[activated] {
+  .union-toggle[activated],
+  .one-of-toggle[activated] {
     background-color: var(
       --api-type-document-union-button-active-background-color,
       #cddc39
