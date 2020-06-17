@@ -4,6 +4,7 @@ import { tap } from '@polymer/iron-test-helpers/mock-interactions.js';
 import '../api-type-document.js';
 
 describe('<api-type-document>', function () {
+  const newOas3Types = 'new-oas3-types';
   async function basicFixture() {
     return await fixture(`<api-type-document></api-type-document>`);
   }
@@ -767,6 +768,40 @@ describe('<api-type-document>', function () {
           assert.isTrue(u2.isType, 'Union2 is type');
           assert.equal(u2.label, 'PropertyExamples', 'Union2 has name');
         });
+      });
+    });
+  });
+
+  [
+    ['Regular model - OAS 3 types additions', false],
+    ['Compact model - OAS 3 types additions', true]
+  ].forEach(([name, compact]) => {
+    describe(name, () => {
+      let element;
+      let amf;
+
+      beforeEach(async () => {
+        element = await basicFixture();
+        amf = await AmfLoader.load(compact, newOas3Types);
+      });
+
+      it('should represent type as oneOf', async () => {
+        element.amf = amf;
+        const [_, type] = await AmfLoader.loadType('Pet', compact, newOas3Types)
+        element.type = type;
+        await aTimeout(0);
+        assert.lengthOf(element.oneOfTypes, 3);
+        assert.equal(element.isOneOf, true);
+      });
+
+      it('changes selectedOneOf when button clicked', async () => {
+        element.amf = amf;
+        const [_, type] = await AmfLoader.loadType('Pet', compact, newOas3Types)
+        element.type = type;
+        await aTimeout(0);
+        assert.equal(element.selectedOneOf, 0);
+        element.shadowRoot.querySelectorAll('.one-of-toggle')[1].click()
+        assert.equal(element.selectedOneOf, 1);
       });
     });
   });
