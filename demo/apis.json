@@ -7,5 +7,6 @@
   "SE-11155/SE-11155.raml": "RAML 1.0",
   "APIC-289/APIC-289.yaml": "OAS 2.0",
   "APIC-282/APIC-282.raml": "RAML 1.0",
-  "APIC-429/APIC-429.yaml": { "type": "OAS 3.0", "mime": "application/yaml" }
+  "APIC-429/APIC-429.yaml": { "type": "OAS 3.0", "mime": "application/yaml" },
+  "new-oas3-types/new-oas3-types.yaml": { "type": "OAS 3.0", "mime": "application/yaml" }
 }
