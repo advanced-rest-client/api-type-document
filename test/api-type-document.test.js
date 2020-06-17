@@ -80,13 +80,13 @@ describe('<api-type-document>', function () {
 
       it('Does nothing whe no argument', () => {
         element.selectedUnion = 1;
-        element._unionTypesChanged();
+        element._multiTypesChanged('selectedUnion');
         assert.equal(element.selectedUnion, 1);
       });
 
       it('Re-sets selected union index', () => {
         element.selectedUnion = 1;
-        element._unionTypesChanged([]);
+        element._multiTypesChanged('selectedUnion', []);
         assert.equal(element.selectedUnion, 0);
       });
     });
@@ -304,39 +304,43 @@ describe('<api-type-document>', function () {
 
       describe('_computeUnionProperty()', () => {
         let element;
+        let key;
+
         beforeEach(async () => {
           element = await basicFixture();
         });
 
-        it('Computes union type', () => {
-          return AmfLoader.loadType('Unionable', item[1]).then((data) => {
-            element.amf = data[0];
-            const result = element._computeUnionProperty(data[1], 0);
-            assert.typeOf(result, 'object');
-          });
+        it('Computes union type', async () => {
+          const [amf, type] = await AmfLoader.loadType('Unionable', item[1]);
+          element.amf = amf;
+          key = element._getAmfKey(element.ns.aml.vocabularies.shapes.anyOf);
+          const result = element._computeProperty(type, key, 0);
+          assert.typeOf(result, 'object');
         });
 
         it('Returns undefined when no type', () => {
-          const result = element._computeUnionProperty();
+          key = element._getAmfKey(element.ns.aml.vocabularies.shapes.anyOf);
+          const result = element._computeProperty(undefined, key, undefined);
           assert.isUndefined(result);
         });
 
         it('Returns undefined when no anyOf property', () => {
-          const result = element._computeUnionProperty({});
+          key = element._getAmfKey(element.ns.aml.vocabularies.shapes.anyOf);
+          const result = element._computeProperty({}, key, undefined);
           assert.isUndefined(result);
         });
 
-        it('Computes union type for an array item', () => {
-          return AmfLoader.loadType('UnionArray', item[1]).then((data) => {
-            element.amf = data[0];
-            const result = element._computeUnionProperty(data[1], 0);
-            assert.isTrue(
-              element._hasType(
-                result,
-                element.ns.aml.vocabularies.shapes.ScalarShape
-              )
-            );
-          });
+        it('Computes union type for an array item', async () => {
+          const [amf, type] = await AmfLoader.loadType('UnionArray', item[1]);
+          element.amf = amf;
+          key = element._getAmfKey(element.ns.aml.vocabularies.shapes.anyOf);
+          const result = element._computeProperty(type, key, 0);
+          assert.isTrue(
+            element._hasType(
+              result,
+              element.ns.aml.vocabularies.shapes.ScalarShape
+            )
+          );
         });
       });
 
