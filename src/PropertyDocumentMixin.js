@@ -330,12 +330,23 @@ const mxFunction = (base) => {
 
     /**
      * Computes list of oneOf type labels to render.
-     *
      * @param {Object} range
      * @return {Array<Object>}
+     * @private
      */
     _computeOneOfTypes(range) {
       const key = this._getAmfKey(this.ns.w3.shacl.xone);
+      return this._computeTypes(range, key);
+    }
+
+    /**
+     * Computes list of anyOf type labels to render.
+     * @param {Object} range
+     * @return {Array<Object>}
+     * @private
+     */
+    _computeAnyOfTypes(range) {
+      const key = this._getAmfKey(this.ns.w3.shacl.or);
       return this._computeTypes(range, key);
     }
 

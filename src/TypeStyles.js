@@ -56,7 +56,8 @@ export default css`
   }
 
   .union-toggle,
-  .one-of-toggle {
+  .one-of-toggle,
+  .any-of-toggle {
     outline: none;
     background-color: var(
       --api-type-document-union-button-background-color,
@@ -69,7 +70,8 @@ export default css`
   }
 
   .union-toggle[activated],
-  .one-of-toggle[activated] {
+  .one-of-toggle[activated],
+  .any-of-toggle[activated] {
     background-color: var(
       --api-type-document-union-button-active-background-color,
       #cddc39

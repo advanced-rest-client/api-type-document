@@ -103,6 +103,14 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
        */
       isAnd: { type: Boolean },
       /**
+       * True if given `type` is OAS "oneOf" type.
+       */
+      isOneOf: { type: Boolean },
+      /**
+       * True if given `type` is OAS "anyOf" type.
+       */
+      isAnyOf: { type: Boolean },
+      /**
        * Computed list of union type types to render in union type
        * selector.
        * Each item has `label` and `isScalar` property.
@@ -115,6 +123,12 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
        */
       oneOfTypes: { type: Array },
       /**
+       * Computed list of anyOf type types to render in anyOf type
+       * selector.
+       * Each item has `label` and `isScalar` property.
+       */
+      anyOfTypes: { type: Array },
+      /**
        * List of types definition and name for OAS' "and" type
        */
       andTypes: { type: Array },
@@ -126,6 +140,10 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
        * Selected index of oneOf type in `oneOfTypes` array.
        */
       selectedOneOf: { type: Number },
+      /**
+       * Selected index of anyOf type in `anyOfTypes` array.
+       */
+      selectedAnyOf: { type: Number },
       /**
        * A property to set when the component is rendered in the narrow
        * view. To be used with mobile rendering or when the
@@ -219,6 +237,20 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     this._oneOfTypesChanged(value);
   }
 
+  get anyOfTypes() {
+    return this._anyOfTypes;
+  }
+
+  set anyOfTypes(value) {
+    const old = this._anyOfTypes;
+    if (old === value) {
+      return;
+    }
+    this._anyOfTypes = value;
+    this.requestUpdate('anyOfTypes', old);
+    this._anyOfTypesChanged(value);
+  }
+
   get noMainExample() {
     return this._noMainExample;
   }
@@ -307,6 +339,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     let isUnion = false;
     let isAnd = false;
     let isOneOf = false;
+    let isAnyOf = false;
     if (type instanceof Array) {
       isObject = true;
     } else if (
@@ -322,6 +355,9 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     } else if (this._hasProperty(type, this.ns.w3.shacl.xone)) {
       isOneOf = true;
       this.oneOfTypes = this._computeOneOfTypes(type);
+    } else if (this._hasProperty(type, this.ns.w3.shacl.or)) {
+      isAnyOf = true;
+      this.anyOfTypes = this._computeAnyOfTypes(type);
     } else if (
       this._hasType(type, this.ns.aml.vocabularies.shapes.ArrayShape)
     ) {
@@ -355,6 +391,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     this.isUnion = isUnion;
     this.isAnd = isAnd;
     this.isOneOf = isOneOf;
+    this.isAnyOf = isAnyOf;
   }
 
   /**
@@ -381,14 +418,26 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
 
   /**
    * Resets oneOf selection when oneOf types list changes.
-   *
    * @param {Array=} types List of current oneOf types.
+   * @private
    */
   _oneOfTypesChanged(types) {
     if (!types) {
       return;
     }
     this.selectedOneOf = 0;
+  }
+
+  /**
+   * Resets anyOf selection when anyOf types list changes.
+   * @param {Array=} types List of current anyOf types.
+   * @private
+   */
+  _anyOfTypesChanged(types) {
+    if (!types) {
+      return;
+    }
+    this.selectedAnyOf = 0;
   }
 
   /**
@@ -430,6 +479,26 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
   }
 
   /**
+   * Handler for anyOf type button click.
+   * Sets `selectedAnyOf` property.
+   *
+   * @param {MouseEvent} e
+   * @private
+   */
+  _selectAnyOf(e) {
+    const node = /** @type AnypointButton */ (e.target);
+    const index = Number(node.dataset.index);
+    if (Number.isNaN(index)) {
+      return;
+    }
+    if (this.selectedAnyOf === index) {
+      node.active = true;
+    } else {
+      this.selectedAnyOf = index;
+    }
+  }
+
+  /**
    * Computes properties for oneOf type.
    *
    * @param {Object} type Current `type` value.
@@ -441,6 +510,22 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       return undefined;
     }
     const key = this._getAmfKey(this.ns.w3.shacl.xone);
+    return this._computeProperty(type, key, selected);
+  }
+
+  /**
+   * Computes properties for oneOf type.
+   *
+   * @param {Object} type Current `type` value.
+   * @param {number} selected Selected oneOf index from `oneOfTypes` array
+   * @return {Object[]|undefined} Properties for oneOf type.
+   * @private
+   */
+  _computeAnyOfProperty(type, selected) {
+    if (!type) {
+      return undefined;
+    }
+    const key = this._getAmfKey(this.ns.w3.shacl.or);
     return this._computeProperty(type, key, selected);
   }
 
@@ -732,6 +817,10 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     `;
   }
 
+  /**
+   * @return {TemplateResult} Template for a oneOf type
+   * @private
+   */
   _oneOfTemplate() {
     const items = this.oneOfTypes;
     return html`
@@ -757,6 +846,46 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
         .type="${this._computeOneOfProperty(
           this._resolvedType,
           this.selectedOneOf
+        )}"
+        ?narrow="${this.narrow}"
+        ?noexamplesactions="${this.noExamplesActions}"
+        ?nomainexample="${this._renderMainExample}"
+        ?compatibility="${this.compatibility}"
+        .mediaType="${this.mediaType}"
+        ?graph="${this.graph}"
+      ></api-type-document>
+    `;
+  }
+
+  /**
+   * @return {TemplateResult} Template for an anyOf type
+   * @private
+   */
+  _anyOfTemplate() {
+    const items = this.anyOfTypes;
+    return html`
+      <div class="any-of-type-selector">
+        <span>Any of:</span>
+        ${items.map(
+          (item, index) => html`<anypoint-button
+            class="any-of-toggle"
+            data-index="${index}"
+            ?activated="${this.selectedAnyOf === index}"
+            aria-pressed="${this.selectedAnyOf === index ? 'true' : 'false'}"
+            @click="${this._selectAnyOf}"
+            ?compatibility="${this.compatibility}"
+            title="Select ${item.label} type"
+            >${item.label}</anypoint-button
+          >`
+        )}
+      </div>
+      <api-type-document
+        class="any-of-type-document"
+        .amf="${this.amf}"
+        .parentTypeName="${this.parentTypeName}"
+        .type="${this._computeAnyOfProperty(
+          this._resolvedType,
+          this.selectedAnyOf
         )}"
         ?narrow="${this.narrow}"
         ?noexamplesactions="${this.noExamplesActions}"
@@ -870,6 +999,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
         : ''}
       ${this.isUnion ? this._unionTemplate() : ''}
       ${this.isAnd ? this._anyTemplate() : ''}
+      ${this.isAnyOf ? this._anyOfTemplate() : ''}
       ${this.isOneOf ? this._oneOfTemplate() : ''}`;
   }
 }
