@@ -153,8 +153,9 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
    * Resets union selection when union types list changes.
    *
    * @param types List of current union types.
+   * @param property Name of field to change
    */
-  _unionTypesChanged(types: object[]): void;
+  _multiTypesChanged(property: string, types: object[]): void;
 
   /**
    * Handler for union type button click.
@@ -167,9 +168,10 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
    *
    * @param type Current `type` value.
    * @param selected Selected union index from `unionTypes` array
+   * @param key Key of the property to look in
    * @returns Properties for union type.
    */
-  _computeUnionProperty(type: Object, selected: number): Object[]|undefined;
+  _computeProperty(type: Object, key: string, selected: number): Object[]|undefined;
 
   /**
    * Helper function for the view. Extracts `http://www.w3.org/ns/shacl#property`

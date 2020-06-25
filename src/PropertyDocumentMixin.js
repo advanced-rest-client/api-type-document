@@ -275,14 +275,15 @@ const mxFunction = (base) => {
           return this._ensureArray(item);
         case this._hasType(item, this.ns.aml.vocabularies.shapes.UnionShape):
         case this._hasType(item, this.ns.aml.vocabularies.shapes.ArrayShape):
+        case this._hasProperty(item, 'http://www.w3.org/ns/shacl#xone'):
           item.isType = true;
           return [item];
         default: {
           const pkey = this._getAmfKey(this.ns.w3.shacl.property);
           const items = this._ensureArray(item[pkey]);
           if (items) {
-            /* eslint-disable-next-line no-param-reassign */
             items.forEach((i) => {
+              /* eslint-disable-next-line no-param-reassign */
               i.isShape = true;
             });
           }
@@ -328,17 +329,13 @@ const mxFunction = (base) => {
     }
 
     /**
-     * Computes list of union type labels to render.
+     * Computes list of type labels to render.
      *
-     * @param {Boolean} isUnion
      * @param {Object} range
+     * @param {String} key Key to look for values in
      * @return {Array<Object>}
      */
-    _computeUnionTypes(isUnion, range) {
-      if (!isUnion || !range) {
-        return undefined;
-      }
-      const key = this._getAmfKey(this.ns.aml.vocabularies.shapes.anyOf);
+    _computeTypes(range, key) {
       const list = this._ensureArray(range[key]);
       if (!list) {
         return undefined;

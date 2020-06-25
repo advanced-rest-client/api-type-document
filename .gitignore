@@ -62,4 +62,4 @@ dist/
 /demo/*.json
 !demo/apis.json
 
-.idea
+.idea/

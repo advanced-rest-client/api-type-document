@@ -127,11 +127,12 @@ class ApiDemo extends ApiDemoPage {
       ['SE-11155', 'SE-11155'],
       ['demo-api-v4', 'Demo Api - AMF v4'],
       ['APIC-282', 'APIC-282'],
+      ['new-oas3-types', 'New OAS 3 types API'],
     ].map(
-      ([file, label]) => html` <paper-item data-src="${file}-compact.json"
-          >${label} - compact model</paper-item
+      ([file, label]) => html` <anypoint-item data-src="${file}-compact.json"
+          >${label} - compact model</anypoint-item
         >
-        <paper-item data-src="${file}.json">${label}</paper-item>`
+        <anypoint-item data-src="${file}.json">${label}</anypoint-item>`
     );
   }
 

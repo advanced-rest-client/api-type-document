@@ -103,11 +103,31 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
        */
       isAnd: { type: Boolean },
       /**
+       * True if given `type` is OAS "oneOf" type.
+       */
+      isOneOf: { type: Boolean },
+      /**
+       * True if given `type` is OAS "anyOf" type.
+       */
+      isAnyOf: { type: Boolean },
+      /**
        * Computed list of union type types to render in union type
        * selector.
        * Each item has `label` and `isScalar` property.
        */
       unionTypes: { type: Array },
+      /**
+       * Computed list of oneOf type types to render in oneOf type
+       * selector.
+       * Each item has `label` and `isScalar` property.
+       */
+      oneOfTypes: { type: Array },
+      /**
+       * Computed list of anyOf type types to render in anyOf type
+       * selector.
+       * Each item has `label` and `isScalar` property.
+       */
+      anyOfTypes: { type: Array },
       /**
        * List of types definition and name for OAS' "and" type
        */
@@ -116,6 +136,14 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
        * Selected index of union type in `unionTypes` array.
        */
       selectedUnion: { type: Number },
+      /**
+       * Selected index of oneOf type in `oneOfTypes` array.
+       */
+      selectedOneOf: { type: Number },
+      /**
+       * Selected index of anyOf type in `anyOfTypes` array.
+       */
+      selectedAnyOf: { type: Number },
       /**
        * A property to set when the component is rendered in the narrow
        * view. To be used with mobile rendering or when the
@@ -194,7 +222,35 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     }
     this._unionTypes = value;
     this.requestUpdate('unionTypes', old);
-    this._unionTypesChanged(value);
+    this._multiTypesChanged('selectedUnion', value);
+  }
+
+  get oneOfTypes() {
+    return this._oneOfTypes;
+  }
+
+  set oneOfTypes(value) {
+    const old = this._oneOfTypes;
+    if (old === value) {
+      return;
+    }
+    this._oneOfTypes = value;
+    this.requestUpdate('oneOfTypes', old);
+    this._multiTypesChanged('selectedOneOf', value);
+  }
+
+  get anyOfTypes() {
+    return this._anyOfTypes;
+  }
+
+  set anyOfTypes(value) {
+    const old = this._anyOfTypes;
+    if (old === value) {
+      return;
+    }
+    this._anyOfTypes = value;
+    this.requestUpdate('anyOfTypes', old);
+    this._multiTypesChanged('selectedAnyOf', value);
   }
 
   get noMainExample() {
@@ -289,6 +345,9 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     let isObject = false;
     let isUnion = false;
     let isAnd = false;
+    let isOneOf = false;
+    let isAnyOf = false;
+    let key = ''
     if (type instanceof Array) {
       isObject = true;
     } else if (
@@ -300,7 +359,16 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       this._hasType(type, this.ns.aml.vocabularies.shapes.UnionShape)
     ) {
       isUnion = true;
-      this.unionTypes = this._computeUnionTypes(true, type);
+      key = this._getAmfKey(this.ns.aml.vocabularies.shapes.anyOf);
+      this.unionTypes = this._computeTypes(type, key);
+    } else if (this._hasProperty(type, this.ns.w3.shacl.xone)) {
+      isOneOf = true;
+      key = this._getAmfKey(this.ns.w3.shacl.xone);
+      this.oneOfTypes = this._computeTypes(type, key);
+    } else if (this._hasProperty(type, this.ns.w3.shacl.or)) {
+      isAnyOf = true;
+      key = this._getAmfKey(this.ns.w3.shacl.or);
+      this.anyOfTypes = this._computeTypes(type, key);
     } else if (
       this._hasType(type, this.ns.aml.vocabularies.shapes.ArrayShape)
     ) {
@@ -332,6 +400,8 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     this.isObject = isObject;
     this.isUnion = isUnion;
     this.isAnd = isAnd;
+    this.isOneOf = isOneOf;
+    this.isAnyOf = isAnyOf;
   }
 
   /**
@@ -345,48 +415,53 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
   }
 
   /**
-   * Resets union selection when union types list changes.
-   *
-   * @param {Array=} types List of current union types.
+   * Resets type selection for property.
+   * @param {Array=} types List of current anyOf types.
+   * @param {String} property Name of the property to be reset
+   * @private
    */
-  _unionTypesChanged(types) {
+  _multiTypesChanged(property, types) {
     if (!types) {
       return;
     }
-    this.selectedUnion = 0;
+    this[property] = 0;
   }
 
   /**
-   * Handler for union type button click.
-   * Sets `selectedUnion` property.
+   * Handler for button click when changing selected type
+   * in multi type template.
+   * Sets given property to the index returned from button.
    *
+   * @param {String} property Property name where selected index is kept
    * @param {MouseEvent} e
+   * @private
    */
-  _selectUnion(e) {
+  _selectType(property, e) {
     const node = /** @type AnypointButton */ (e.target);
     const index = Number(node.dataset.index);
     if (Number.isNaN(index)) {
       return;
     }
-    if (this.selectedUnion === index) {
+    if (this[property] === index) {
       node.active = true;
     } else {
-      this.selectedUnion = index;
+      this[property] = index;
     }
   }
 
   /**
-   * Computes properties for union type.
+   * Computes properties for type
    *
-   * @param {Object} type Current `type` value.
-   * @param {number} selected Selected union index from `unionTypes` array
-   * @return {Object[]|undefined} Properties for union type.
+   * @param {Object} type Type object
+   * @param {String} key Key of property to search in the `type` object
+   * @param {number} selected Index of the currently selected type
+   * @returns {object|undefined} Properties for type
+   * @private
    */
-  _computeUnionProperty(type, selected) {
+  _computeProperty(type, key, selected) {
     if (!type) {
       return undefined;
     }
-    const key = this._getAmfKey(this.ns.aml.vocabularies.shapes.anyOf);
     const data = type[key];
     if (!data) {
       return undefined;
@@ -617,30 +692,79 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
    */
   _unionTemplate() {
     const items = this.unionTypes || [];
+    const selected = this.selectedUnion;
+    const selectTypeCallback = this._selectType.bind(this, 'selectedUnion');
+    const key = this._getAmfKey(this.ns.aml.vocabularies.shapes.anyOf);
+    const type = this._computeProperty(this._resolvedType, key,selected);
+    const typeName = 'union'
+    const label = 'Any of'
+    return this._multiTypeTemplate({ label, items, typeName, selected, selectTypeCallback, type });
+  }
+
+  /**
+   * @return {TemplateResult} Template for a oneOf type
+   * @private
+   */
+  _oneOfTemplate() {
+    const items = this.oneOfTypes;
+    const label = 'One of';
+    const typeName = 'one-of';
+    const selected = this.selectedOneOf;
+    const selectTypeCallback = this._selectType.bind(this, 'selectedOneOf');
+    const key = this._getAmfKey(this.ns.w3.shacl.xone);
+    const type = this._computeProperty(this._resolvedType, key, selected);
+    return this._multiTypeTemplate({ label, items, typeName, selected, selectTypeCallback, type });
+  }
+
+  /**
+   * @return {TemplateResult} Template for an anyOf type
+   * @private
+   */
+  _anyOfTemplate() {
+    const items = this.anyOfTypes;
+    const label = 'Any of';
+    const typeName = 'any-of';
+    const selected = this.selectedAnyOf;
+    const selectTypeCallback = this._selectType.bind(this, 'selectedAnyOf');
+    const key = this._getAmfKey(this.ns.w3.shacl.or);
+    const type = this._computeProperty(this._resolvedType, key, selected);
+    return this._multiTypeTemplate({ label, items, typeName, selected, selectTypeCallback, type });
+  }
+
+  /**
+   *
+   * @param {Object} args
+   * @param args.label
+   * @param args.items
+   * @param args.typeName
+   * @param args.selected
+   * @param args.selectTypeCallback
+   * @param args.type
+   * @return {TemplateResult} Template for a type which hosts multiple types
+   * @private
+   */
+  _multiTypeTemplate({ label, items, typeName, selected, selectTypeCallback, type }) {
     return html`
       <div class="union-type-selector">
-        <span>Any of:</span>
+        <span>${label}:</span>
         ${items.map(
-          (item, index) => html`<anypoint-button
-            class="union-toggle"
+      (item, index) => html`<anypoint-button
+            class="${typeName}-toggle"
             data-index="${index}"
-            ?activated="${this.selectedUnion === index}"
-            aria-pressed="${this.selectedUnion === index ? 'true' : 'false'}"
-            @click="${this._selectUnion}"
+            ?activated="${selected === index}"
+            aria-pressed="${selected === index ? 'true' : 'false'}"
+            @click="${selectTypeCallback}"
             ?compatibility="${this.compatibility}"
             title="Select ${item.label} type"
             >${item.label}</anypoint-button
           >`
-        )}
+    )}
       </div>
       <api-type-document
-        class="union-document"
+        class="${typeName}-document"
         .amf="${this.amf}"
         .parentTypeName="${this.parentTypeName}"
-        .type="${this._computeUnionProperty(
-          this._resolvedType,
-          this.selectedUnion
-        )}"
+        .type="${type}"
         ?narrow="${this.narrow}"
         ?noexamplesactions="${this.noExamplesActions}"
         ?nomainexample="${this._renderMainExample}"
@@ -753,7 +877,9 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
           ></property-shape-document>`
         : ''}
       ${this.isUnion ? this._unionTemplate() : ''}
-      ${this.isAnd ? this._anyTemplate() : ''}`;
+      ${this.isAnd ? this._anyTemplate() : ''}
+      ${this.isAnyOf ? this._anyOfTemplate() : ''}
+      ${this.isOneOf ? this._oneOfTemplate() : ''}`;
   }
 
   _filterReadOnlyItemsIfNecessary(resolvedType) {

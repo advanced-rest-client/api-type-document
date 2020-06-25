@@ -106,9 +106,13 @@ interface PropertyDocumentMixin {
   _computeIsArray(range: Object): boolean;
 
   /**
-   * Computes list of union type labels to render.
+   * Computes list of type labels to render.
+   *
+   * @param {Object} range
+   * @param {String} key Key to look for values in
+   * @return {Array<Object>}
    */
-  _computeUnionTypes(isUnion: boolean, range: Object): Object[];
+  _computeTypes(range, key);
 
   /**
    * Computes union type label when the union is in Array.

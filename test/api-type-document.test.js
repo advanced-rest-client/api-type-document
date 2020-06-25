@@ -4,6 +4,7 @@ import { tap } from '@polymer/iron-test-helpers/mock-interactions.js';
 import '../api-type-document.js';
 
 describe('<api-type-document>', function () {
+  const newOas3Types = 'new-oas3-types';
   async function basicFixture() {
     return await fixture(`<api-type-document></api-type-document>`);
   }
@@ -79,13 +80,13 @@ describe('<api-type-document>', function () {
 
       it('Does nothing whe no argument', () => {
         element.selectedUnion = 1;
-        element._unionTypesChanged();
+        element._multiTypesChanged('selectedUnion');
         assert.equal(element.selectedUnion, 1);
       });
 
       it('Re-sets selected union index', () => {
         element.selectedUnion = 1;
-        element._unionTypesChanged([]);
+        element._multiTypesChanged('selectedUnion', []);
         assert.equal(element.selectedUnion, 0);
       });
     });
@@ -303,39 +304,43 @@ describe('<api-type-document>', function () {
 
       describe('_computeUnionProperty()', () => {
         let element;
+        let key;
+
         beforeEach(async () => {
           element = await basicFixture();
         });
 
-        it('Computes union type', () => {
-          return AmfLoader.loadType('Unionable', item[1]).then((data) => {
-            element.amf = data[0];
-            const result = element._computeUnionProperty(data[1], 0);
-            assert.typeOf(result, 'object');
-          });
+        it('Computes union type', async () => {
+          const [amf, type] = await AmfLoader.loadType('Unionable', item[1]);
+          element.amf = amf;
+          key = element._getAmfKey(element.ns.aml.vocabularies.shapes.anyOf);
+          const result = element._computeProperty(type, key, 0);
+          assert.typeOf(result, 'object');
         });
 
         it('Returns undefined when no type', () => {
-          const result = element._computeUnionProperty();
+          key = element._getAmfKey(element.ns.aml.vocabularies.shapes.anyOf);
+          const result = element._computeProperty(undefined, key, undefined);
           assert.isUndefined(result);
         });
 
         it('Returns undefined when no anyOf property', () => {
-          const result = element._computeUnionProperty({});
+          key = element._getAmfKey(element.ns.aml.vocabularies.shapes.anyOf);
+          const result = element._computeProperty({}, key, undefined);
           assert.isUndefined(result);
         });
 
-        it('Computes union type for an array item', () => {
-          return AmfLoader.loadType('UnionArray', item[1]).then((data) => {
-            element.amf = data[0];
-            const result = element._computeUnionProperty(data[1], 0);
-            assert.isTrue(
-              element._hasType(
-                result,
-                element.ns.aml.vocabularies.shapes.ScalarShape
-              )
-            );
-          });
+        it('Computes union type for an array item', async () => {
+          const [amf, type] = await AmfLoader.loadType('UnionArray', item[1]);
+          element.amf = amf;
+          key = element._getAmfKey(element.ns.aml.vocabularies.shapes.anyOf);
+          const result = element._computeProperty(type, key, 0);
+          assert.isTrue(
+            element._hasType(
+              result,
+              element.ns.aml.vocabularies.shapes.ScalarShape
+            )
+          );
         });
       });
 
@@ -767,6 +772,57 @@ describe('<api-type-document>', function () {
           assert.isTrue(u2.isType, 'Union2 is type');
           assert.equal(u2.label, 'PropertyExamples', 'Union2 has name');
         });
+      });
+    });
+  });
+
+  [
+    ['Regular model - OAS 3 types additions', false],
+    ['Compact model - OAS 3 types additions', true]
+  ].forEach(([name, compact]) => {
+    describe(name, () => {
+      let element;
+
+      beforeEach(async () => {
+        element = await basicFixture();
+      });
+
+      it('should represent type as oneOf', async () => {
+        const [amf, type] = await AmfLoader.loadType('Pet', compact, newOas3Types)
+        element.amf = amf;
+        element.type = type;
+        await aTimeout(0);
+        assert.lengthOf(element.oneOfTypes, 3);
+        assert.equal(element.isOneOf, true);
+      });
+
+      it('changes selectedOneOf when button clicked', async () => {
+        const [amf, type] = await AmfLoader.loadType('Pet', compact, newOas3Types)
+        element.amf = amf;
+        element.type = type;
+        await aTimeout(0);
+        assert.equal(element.selectedOneOf, 0);
+        element.shadowRoot.querySelectorAll('.one-of-toggle')[1].click()
+        assert.equal(element.selectedOneOf, 1);
+      });
+
+      it('should represent type as anyOf', async () => {
+        const [amf, type] = await AmfLoader.loadType('Monster', compact, newOas3Types)
+        element.amf = amf;
+        element.type = type;
+        await aTimeout(0);
+        assert.lengthOf(element.anyOfTypes, 3);
+        assert.equal(element.isAnyOf, true);
+      });
+
+      it('changes selectedAnyOf when button clicked', async () => {
+        const [amf, type] = await AmfLoader.loadType('Monster', compact, newOas3Types)
+        element.amf = amf;
+        element.type = type;
+        await aTimeout(0);
+        assert.equal(element.selectedAnyOf, 0);
+        element.shadowRoot.querySelectorAll('.any-of-toggle')[1].click()
+        assert.equal(element.selectedAnyOf, 1);
       });
     });
   });
