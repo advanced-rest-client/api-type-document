@@ -93,6 +93,10 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
        */
       isEnum: { type: Boolean },
       /**
+       * Computed value form the shape. True if the property is read only.
+       */
+      isReadOnly: { type: Boolean },
+      /**
        * A description of the property to render.
        */
       propertyDescription: { type: String },
@@ -121,7 +125,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
        * is currently rendered.
        */
       opened: { type: Boolean },
-      renderReadOnly: { type: Boolean }
+      renderReadOnly: { type: Boolean },
     };
   }
 
