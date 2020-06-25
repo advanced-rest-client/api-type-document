@@ -456,6 +456,26 @@ const mxFunction = (base) => {
     }
 
     _evaluateGraph() {}
+
+    _isPropertyReadOnly(property) {
+      if (Array.isArray(property)) {
+        property = property[0]
+      }
+      const rKey = this._getAmfKey(this.ns.aml.vocabularies.shapes.range)
+      const range = property[rKey]
+      return this._isReadOnly(range)
+    }
+
+    _isReadOnly(node) {
+      if (Array.isArray(node)) {
+        node = node[0]
+      }
+      if (!node) {
+        return false
+      }
+      const roKey = this._getAmfKey(this.ns.aml.vocabularies.shapes.readOnly)
+      return this._getValue(node, roKey);
+    }
   }
   return PropertyDocumentMixinImpl;
 };

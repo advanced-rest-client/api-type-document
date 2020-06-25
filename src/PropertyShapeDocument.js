@@ -238,6 +238,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     this.isObject = this._computeIsObject(range);
     this.isArray = this._computeIsArray(range);
     this.isEnum = this._computeIsEnum(range, this.isArray);
+    this.isReadOnly = this._isReadOnly(range);
     this.isComplex = this._computeIsComplex(
       this.isUnion,
       this.isObject,
@@ -641,6 +642,13 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
               class="enum-type"
               title="This property represent enumerable value"
               >Enum</span
+            >`
+          : ''}
+        ${this.isReadOnly
+          ? html`<span
+              class="readonly-type"
+              title="This property represents a read only value"
+              >Read only</span
             >`
           : ''}
       </div>

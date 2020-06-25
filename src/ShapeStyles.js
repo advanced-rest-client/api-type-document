@@ -151,4 +151,9 @@ export default css`
     -ms-flex: 1;
     flex: 1;
   }
+  
+  .property-traits > span.readonly-type {
+    background-color: var(--api-type-readonly-property-background-color, #ff9292);
+    color: var(--api-type-readonly-property-color, black);
+  }
 `;
