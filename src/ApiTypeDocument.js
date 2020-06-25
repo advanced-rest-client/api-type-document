@@ -294,9 +294,6 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     this.selectedBodyId = undefined;
     this.aware = undefined;
 
-    this._filterReadOnlyItemsIfNecessary = this._filterReadOnlyItemsIfNecessary.bind(
-      this
-    );
     this._isPropertyReadOnly = this._isPropertyReadOnly.bind(this);
   }
 
@@ -880,18 +877,6 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       ${this.isAnd ? this._anyTemplate() : ''}
       ${this.isAnyOf ? this._anyOfTemplate() : ''}
       ${this.isOneOf ? this._oneOfTemplate() : ''}`;
-  }
-
-  _filterReadOnlyItemsIfNecessary(resolvedType) {
-    if (this.renderReadOnly) {
-      return resolvedType;
-    }
-    const pKey = this._getAmfKey(this.ns.w3.shacl.property);
-    const properties = resolvedType[pKey];
-    return {
-      ...resolvedType,
-      [pKey]: this._filterReadOnlyProperties(properties),
-    };
   }
 
   _filterReadOnlyProperties(properties) {
