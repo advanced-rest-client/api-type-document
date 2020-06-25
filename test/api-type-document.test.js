@@ -705,6 +705,34 @@ describe('<api-type-document>', function () {
           assert.lengthOf(docs, 3);
         });
       });
+
+      describe('readOnly properties', () => {
+        let element
+
+        beforeEach(async () => {
+          const data = await AmfLoader.loadType(
+            'Article',
+            item[1],
+            'read-only-properties'
+          );
+          element = await basicFixture();
+          element.amf = data[0];
+          element.type = data[1];
+          await aTimeout(0);
+        });
+
+        it('does not render the readOnly properties', async () => {
+          element.renderReadOnly = false;
+          await nextFrame();
+          assert.lengthOf(element.shadowRoot.querySelectorAll('property-shape-document'), 1);
+        });
+
+        it('renders the readOnly properties', async () => {
+          element.renderReadOnly = true;
+          await nextFrame();
+          assert.lengthOf(element.shadowRoot.querySelectorAll('property-shape-document'), 2);
+        });
+      })
     });
   });
 
