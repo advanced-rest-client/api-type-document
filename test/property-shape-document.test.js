@@ -1,4 +1,4 @@
-import { fixture, assert, nextFrame, html } from '@open-wc/testing';
+import { assert, fixture, html, nextFrame } from '@open-wc/testing';
 import * as sinon from 'sinon';
 import * as MockInteractions from '@polymer/iron-test-helpers/mock-interactions.js';
 import { AmfLoader } from './amf-loader.js';
@@ -89,6 +89,34 @@ describe('<property-shape-document>', () => {
           const shape = getPropertyShape(element, type, 'name');
           element.shape = shape;
           assert.isTrue(element.isRequired);
+        });
+
+        it('sets isReadOnly', async () => {
+          const data = await AmfLoader.loadType(
+            'Article',
+            item[1],
+            'read-only-properties'
+          );
+          amf = data[0];
+          type = data[1];
+          element.shape = getPropertyShape(element, type, 'id');
+          assert.isTrue(element.isReadOnly);
+        });
+
+        it('renders read only trait', async () => {
+          const data = await AmfLoader.loadType(
+            'Article',
+            item[1],
+            'read-only-properties'
+          );
+          amf = data[0];
+          type = data[1];
+          element.shape = getPropertyShape(element, type, 'id');
+          await nextFrame();
+          assert.lengthOf(
+            element.shadowRoot.querySelectorAll('span.readonly-type'),
+            1
+          );
         });
       });
     });
