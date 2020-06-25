@@ -238,8 +238,10 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     this.selectedBodyId = undefined;
     this.aware = undefined;
 
-    this._filterReadOnlyItemsIfNecessary = this._filterReadOnlyItemsIfNecessary.bind(this)
-    this._isPropertyReadOnly = this._isPropertyReadOnly.bind(this)
+    this._filterReadOnlyItemsIfNecessary = this._filterReadOnlyItemsIfNecessary.bind(
+      this
+    );
+    this._isPropertyReadOnly = this._isPropertyReadOnly.bind(this);
   }
 
   connectedCallback() {
@@ -303,6 +305,17 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       this._hasType(type, this.ns.aml.vocabularies.shapes.ArrayShape)
     ) {
       isArray = true;
+      const iKey = this._getAmfKey(this.ns.aml.vocabularies.shapes.items);
+      let items = this._ensureArray(type[iKey]);
+      if (items) {
+        items = items[0];
+        const key = this._getAmfKey(this.ns.w3.shacl.and);
+        if (key in items) {
+          isArray = false;
+          isAnd = true;
+          this.andTypes = this._computeAndTypes(items[key]);
+        }
+      }
     } else if (this._hasType(type, this.ns.w3.shacl.NodeShape)) {
       isObject = true;
     } else if (this._hasType(type, this.ns.aml.vocabularies.shapes.AnyShape)) {
@@ -744,21 +757,24 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
   }
 
   _filterReadOnlyItemsIfNecessary(resolvedType) {
-	if (this.renderReadOnly) {
-	  return resolvedType
-	}
-	const pKey = this._getAmfKey(this.ns.w3.shacl.property)
-	const properties = resolvedType[pKey]
-	return { ...resolvedType, [pKey]: this._filterReadOnlyProperties(properties) }
+    if (this.renderReadOnly) {
+      return resolvedType;
+    }
+    const pKey = this._getAmfKey(this.ns.w3.shacl.property);
+    const properties = resolvedType[pKey];
+    return {
+      ...resolvedType,
+      [pKey]: this._filterReadOnlyProperties(properties),
+    };
   }
 
   _filterReadOnlyProperties(properties) {
     if (this.renderReadOnly) {
-      return properties
+      return properties;
     }
     if (!properties) {
-      return undefined
-	}
-    return properties.filter(p => !this._isPropertyReadOnly(p))
+      return undefined;
+    }
+    return properties.filter((p) => !this._isPropertyReadOnly(p));
   }
 }
