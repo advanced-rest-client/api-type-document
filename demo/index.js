@@ -43,7 +43,7 @@ class ApiDemo extends ApiDemoPage {
     const webApi = this._computeWebApi(this.amf);
     const method = this._computeMethodModel(webApi, id);
     const expects = this._computeExpects(method);
-    const payload = this._computePayload(expects)[0];
+    const payload = expects ? this._computePayload(expects)[0] : {};
     const mt = this._getValue(payload, this.ns.aml.vocabularies.core.mediaType);
     const key = this._getAmfKey(this.ns.aml.vocabularies.shapes.schema);
     let schema = payload && payload[key];
@@ -117,8 +117,9 @@ class ApiDemo extends ApiDemoPage {
 
   _apiListTemplate() {
     return [
-      ['read-only-properties', 'Read Only Properties API'],
+      ['APIC-429', 'APIC 429'],
       ['demo-api', 'Demo API'],
+      ['read-only-properties', 'Read Only Properties API'],
       ['examples-api', 'Examples render demo'],
       ['Petstore', 'OAS: Petstore'],
       ['apic-83', 'APIC-83'],
