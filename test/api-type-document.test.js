@@ -1,12 +1,12 @@
 import { fixture, assert, nextFrame, aTimeout } from '@open-wc/testing';
-import { AmfLoader } from './amf-loader.js';
 import { tap } from '@polymer/iron-test-helpers/mock-interactions.js';
+import { AmfLoader } from './amf-loader.js';
 import '../api-type-document.js';
 
 describe('<api-type-document>', function () {
   const newOas3Types = 'new-oas3-types';
   async function basicFixture() {
-    return await fixture(`<api-type-document></api-type-document>`);
+    return fixture(`<api-type-document></api-type-document>`);
   }
 
   function getPayloadType(element, model, path, methodName) {
@@ -707,7 +707,7 @@ describe('<api-type-document>', function () {
       });
 
       describe('readOnly properties', () => {
-        let element
+        let element;
 
         beforeEach(async () => {
           const data = await AmfLoader.loadType(
@@ -724,15 +724,21 @@ describe('<api-type-document>', function () {
         it('does not render the readOnly properties', async () => {
           element.renderReadOnly = false;
           await nextFrame();
-          assert.lengthOf(element.shadowRoot.querySelectorAll('property-shape-document'), 1);
+          assert.lengthOf(
+            element.shadowRoot.querySelectorAll('property-shape-document'),
+            1
+          );
         });
 
         it('renders the readOnly properties', async () => {
           element.renderReadOnly = true;
           await nextFrame();
-          assert.lengthOf(element.shadowRoot.querySelectorAll('property-shape-document'), 2);
+          assert.lengthOf(
+            element.shadowRoot.querySelectorAll('property-shape-document'),
+            2
+          );
         });
-      })
+      });
     });
   });
 
@@ -806,7 +812,7 @@ describe('<api-type-document>', function () {
 
   [
     ['Regular model - OAS 3 types additions', false],
-    ['Compact model - OAS 3 types additions', true]
+    ['Compact model - OAS 3 types additions', true],
   ].forEach(([name, compact]) => {
     describe(name, () => {
       let element;
@@ -816,7 +822,11 @@ describe('<api-type-document>', function () {
       });
 
       it('should represent type as oneOf', async () => {
-        const [amf, type] = await AmfLoader.loadType('Pet', compact, newOas3Types)
+        const [amf, type] = await AmfLoader.loadType(
+          'Pet',
+          compact,
+          newOas3Types
+        );
         element.amf = amf;
         element.type = type;
         await aTimeout(0);
@@ -825,17 +835,25 @@ describe('<api-type-document>', function () {
       });
 
       it('changes selectedOneOf when button clicked', async () => {
-        const [amf, type] = await AmfLoader.loadType('Pet', compact, newOas3Types)
+        const [amf, type] = await AmfLoader.loadType(
+          'Pet',
+          compact,
+          newOas3Types
+        );
         element.amf = amf;
         element.type = type;
         await aTimeout(0);
         assert.equal(element.selectedOneOf, 0);
-        element.shadowRoot.querySelectorAll('.one-of-toggle')[1].click()
+        element.shadowRoot.querySelectorAll('.one-of-toggle')[1].click();
         assert.equal(element.selectedOneOf, 1);
       });
 
       it('should represent type as anyOf', async () => {
-        const [amf, type] = await AmfLoader.loadType('Monster', compact, newOas3Types)
+        const [amf, type] = await AmfLoader.loadType(
+          'Monster',
+          compact,
+          newOas3Types
+        );
         element.amf = amf;
         element.type = type;
         await aTimeout(0);
@@ -844,13 +862,43 @@ describe('<api-type-document>', function () {
       });
 
       it('changes selectedAnyOf when button clicked', async () => {
-        const [amf, type] = await AmfLoader.loadType('Monster', compact, newOas3Types)
+        const [amf, type] = await AmfLoader.loadType(
+          'Monster',
+          compact,
+          newOas3Types
+        );
         element.amf = amf;
         element.type = type;
         await aTimeout(0);
         assert.equal(element.selectedAnyOf, 0);
-        element.shadowRoot.querySelectorAll('.any-of-toggle')[1].click()
+        element.shadowRoot.querySelectorAll('.any-of-toggle')[1].click();
         assert.equal(element.selectedAnyOf, 1);
+      });
+    });
+  });
+
+  [
+    ['Regular model - AAP-1698', false],
+    ['Compact model - AAP-1698', true],
+  ].forEach(([name, compact]) => {
+    describe(name, () => {
+      let element;
+      let amf;
+      let type;
+
+      beforeEach(async () => {
+        element = await basicFixture();
+        amf = await AmfLoader.load(compact, 'aap-1698');
+        element.amf = amf;
+        [type] = getPayloadType(element, amf, '/not-working', 'post');
+        element.type = type;
+        await nextFrame();
+      });
+
+      it('renders array of enum strings property with partial model', () => {
+        assert.exists(
+          element.shadowRoot.querySelector('property-shape-document')
+        );
       });
     });
   });
