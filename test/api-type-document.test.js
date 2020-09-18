@@ -893,6 +893,7 @@ describe('<api-type-document>', function () {
         [type] = getPayloadType(element, amf, '/not-working', 'post');
         element.type = type;
         await nextFrame();
+        await aTimeout(0);
       });
 
       it('renders array of enum strings property with partial model', () => {
