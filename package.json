@@ -93,7 +93,9 @@
       }
     ],
     "rules": {
-      "prefer-destructuring": "off"
+      "prefer-destructuring": "off",
+      "no-plusplus": "off",
+      "consistent-return": "off"
     }
   },
   "prettier": {
