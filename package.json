@@ -91,7 +91,10 @@
           "import/no-extraneous-dependencies": "off"
         }
       }
-    ]
+    ],
+    "rules": {
+      "prefer-destructuring": "off"
+    }
   },
   "prettier": {
     "singleQuote": true,
