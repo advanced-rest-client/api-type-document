@@ -172,7 +172,7 @@ export class PropertyRangeDocument extends PropertyDocumentMixin(LitElement) {
       [model] = model;
     }
     if (isArray) {
-      [model] = model[ikey];
+      model = model[ikey];
     }
     const results = [];
     Object.keys(model).forEach((key) => {
