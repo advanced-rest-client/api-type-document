@@ -24,6 +24,10 @@ export default css`
   }
 
   .property-title {
+    font-family: var(
+      --property-shape-document-title-font-family,
+      var(--arc-font-subhead-font-family)
+    );
     font-size: var(
       --property-shape-document-title-font-size,
       var(--arc-font-subhead-font-size)
@@ -37,7 +41,10 @@ export default css`
       var(--arc-font-subhead-line-height)
     );
 
-    margin: 4px 0 4px 0;
+    margin: var(
+      --property-shape-document-title-margin,
+      4px 0 4px 0
+    );
     font-size: 1rem;
     font-weight: var(--api-type-document-property-title-font-weight, 500);
     word-break: break-word;
@@ -100,6 +107,7 @@ export default css`
   }
 
   .property-traits {
+    font-family: var(--api-type-document-trait-font-family);
     display: -ms-flexbox;
     display: flex;
     flex-direction: row;
