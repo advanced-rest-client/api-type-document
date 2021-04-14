@@ -30,7 +30,7 @@ export default css`
     );
     font-size: var(
       --property-shape-document-title-font-size,
-      var(--arc-font-subhead-font-size)
+      var(--arc-font-subhead-font-size, 1rem)
     );
     font-weight: var(
       --property-shape-document-title-font-weight,
