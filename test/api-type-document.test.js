@@ -753,6 +753,7 @@ describe('<api-type-document>', () => {
     ['Compact model - Union types', true],
   ].forEach((item) => {
     describe(String(item[0]), () => {
+      const compact = item[1]
       describe('_typeChanged()', () => {
         let element = /** @type ApiTypeDocument */ (null);
         beforeEach(async () => {
@@ -811,6 +812,23 @@ describe('<api-type-document>', () => {
           assert.isFalse(u2.isScalar, 'Union2 is not scalar');
           assert.isTrue(u2.isType, 'Union2 is type');
           assert.equal(u2.label, 'PropertyExamples', 'Union2 has name');
+        });
+      });
+
+      describe('APIC-631', () => {
+        let element = /** @type ApiTypeDocument */ (null);
+
+        beforeEach(async () => {
+          element = await basicFixture();
+        });
+
+        it('should render union toggle as "Array of String"', async () => {
+          const data = await AmfLoader.loadType('test2', compact, 'APIC-631');
+          element.amf = data[0];
+          element._typeChanged(element._resolve(data[1]));
+          await nextFrame();
+          const firstToggle = element.shadowRoot.querySelectorAll('.union-toggle')[0]
+          assert.equal(firstToggle.textContent.toLowerCase(), 'array of string');
         });
       });
     });
