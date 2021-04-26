@@ -419,7 +419,7 @@ const mxFunction = (base) => {
       }
       list = this._resolve(list);
       if (this._hasType(list, this.ns.aml.vocabularies.shapes.ScalarShape)) {
-        return this._computeRangeDataType(list);
+        return `Array of ${this._computeRangeDataType(list)}`;
       }
       return this._computeDisplayName(list, list);
     }
