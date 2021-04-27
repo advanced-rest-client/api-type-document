@@ -839,6 +839,16 @@ describe('<api-type-document>', () => {
           const propertyName = element.shadowRoot.querySelector('property-shape-document').shadowRoot.querySelector('span.property-name');
           assert.notExists(propertyName);
         });
+
+        it('should render "Array of:" in title for scalar array', async () => {
+          const data = await AmfLoader.loadType('test3', compact, 'APIC-631');
+          element.amf = data[0];
+          element.type = data[1]
+          await aTimeout(100);
+          const firstSpan = element.shadowRoot.querySelector('span');
+          assert.exists(firstSpan);
+          assert.equal(firstSpan.textContent, 'Array of:');
+        });
       });
     });
   });
