@@ -652,7 +652,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
             .mediaType="${this.mediaType}"
             ?graph="${this.graph}"
           ></property-shape-document>`
-        : ''}
+        : html`<span>Array of:</span>`}
 
       <div class="array-children">
         ${items.map(
