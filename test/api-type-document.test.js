@@ -830,6 +830,15 @@ describe('<api-type-document>', () => {
           const firstToggle = element.shadowRoot.querySelectorAll('.union-toggle')[0]
           assert.equal(firstToggle.textContent.toLowerCase(), 'array of string');
         });
+
+        it('should not render type name as "undefined" for inline type', async () => {
+          const data = await AmfLoader.loadType('test3', compact, 'APIC-631');
+          element.amf = data[0];
+          element.type = data[1]
+          await aTimeout(100);
+          const propertyName = element.shadowRoot.querySelector('property-shape-document').shadowRoot.querySelector('span.property-name');
+          assert.notExists(propertyName);
+        });
       });
     });
   });
