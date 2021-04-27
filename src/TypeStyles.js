@@ -9,7 +9,10 @@ export default css`
   }
 
   property-shape-document {
-    padding: 12px 0;
+    padding: var(
+      --property-shape-document-padding,
+      12px 0
+    );
   }
 
   property-shape-document:last-of-type,
