@@ -181,6 +181,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
       [type] = type;
       let typed = String(type['@id']);
       typed = typed.replace(this.ns.w3.xmlSchema.key, '');
+      typed = typed.replace(this.ns.aml.vocabularies.shapes.toString(), '');
       const stLetter = typed[0].toUpperCase();
       return `${stLetter}${typed.substr(1)}`;
     } catch (_) {
