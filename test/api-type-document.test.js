@@ -849,6 +849,15 @@ describe('<api-type-document>', () => {
           assert.exists(firstSpan);
           assert.equal(firstSpan.textContent, 'Array of:');
         });
+
+        it('should render "Array of number" data type', async () => {
+          const data = await AmfLoader.loadType('test8', compact, 'APIC-631');
+          element.amf = data[0];
+          element.type = data[1]
+          await aTimeout(100);
+          const dataType = element.shadowRoot.querySelector('property-shape-document').shadowRoot.querySelector('span.data-type');
+          assert.equal(dataType.textContent, 'Array of Number');
+        });
       });
     });
   });
