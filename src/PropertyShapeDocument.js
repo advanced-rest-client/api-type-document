@@ -295,6 +295,9 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
           shape,
           this.ns.w3.shacl.name
         ));
+        if (name === undefined) {
+          return undefined
+        }
         if (name && name.indexOf('amf_inline_type') === 0) {
           return undefined;
         }
