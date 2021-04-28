@@ -12,6 +12,9 @@ uses:
 
 securedBy: [candaCommons.basicAuth]
 
+types:
+  Companies: !include ref/companies-schema.json
+
 /greetings:
   description: The greetings resource contains only a simple message. The message text might be customized by passing a query parameter.
   is: [ candaCommons.client-id-required ]
@@ -79,7 +82,7 @@ securedBy: [candaCommons.basicAuth]
       application/json:
         examples:
           example1: !include ref/companies-example.json
-        type: !include ref/companies-schema.json
+        type: Companies
     responses:
       201:
         description: Created

@@ -234,6 +234,13 @@ describe('PropertyShapeDocument', () => {
           assert.isTrue(element.isComplex);
         });
 
+        it('sets isComplex to true when is or', async () => {
+          const data = await AmfLoader.loadType('Companies', item[1], 'SE-19500');
+          const shape = getPropertyShape(element, data[1], 'companyType');
+          element.shape = shape;
+          assert.isTrue(element.isComplex);
+        });
+
         it('sets isComplex to false otherwise', async () => {
           const shape = getPropertyShape(element, type, 'name');
           element.shape = shape;

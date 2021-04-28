@@ -41,6 +41,10 @@ export class PropertyShapeDocument extends  PropertyDocumentMixin(LitElement) {
    */
   isArray: boolean;
   /**
+   * Computed value from the shape. True if the property is an anyOf
+   */
+  isAnyOf: boolean;
+  /**
    * Computed value, true if current property is an array and the item
    * is a scalar.
    * @attribute

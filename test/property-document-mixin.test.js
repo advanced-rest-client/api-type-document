@@ -1,4 +1,4 @@
-import { assert, fixture } from '@open-wc/testing';
+import { assert, fixture, nextFrame } from '@open-wc/testing';
 import { AmfLoader } from './amf-loader.js';
 import './test-document-mixin.js';
 
@@ -396,6 +396,39 @@ describe('PropertyDocumentMixin', () => {
           const result = element._computeArrayProperties(model);
           assert.typeOf(result, 'array');
           assert.lengthOf(result, 3);
+        });
+      });
+    });
+  });
+
+  describe('_computeIsAnyOf()', () => {
+    [
+      ['Regular model', false],
+      ['Compact model', true],
+    ].forEach((item) => {
+      describe(String(item[0]), () => {
+        let element;
+        let amf;
+
+        before(async () => {
+          amf = AmfLoader.load(item[1]);
+        });
+
+        beforeEach(async () => {
+          element = await basicFixture();
+          element.amf = amf;
+          await nextFrame();
+        });
+
+        it('should return true if range has `or` property', () => {
+          const orKey = element._getAmfKey(element.ns.w3.shacl.or);
+          const range = { [orKey]: [] };
+          assert.isTrue(element._computeIsAnyOf(range));
+        });
+
+        it('should return false if range does not have or property', () => {
+          const range = {};
+          assert.isFalse(element._computeIsAnyOf(range));
         });
       });
     });

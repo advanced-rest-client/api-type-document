@@ -44,6 +44,23 @@
         "type": "object"
       },
       "type": "array"
+    },
+    "companyType": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 10,
+          "description": "The legal name of the given company.",
+          "enum": [
+            "EU"
+          ]
+        },
+        {
+          "type": "string",
+          "description": "Any future added type",
+          "maxLength": 10
+        }
+      ]
     }
   },
   "required": [
