@@ -337,6 +337,15 @@ const mxFunction = (base) => {
     }
 
     /**
+     * Computes value for `isAnyOf` property.
+     * @param {Object} range Range object of current shape.
+     * @returns {boolean}
+     */
+    _computeIsAnyOf(range) {
+      return this._hasProperty(range, this.ns.w3.shacl.or);
+    }
+
+    /**
      * Computes list of type labels to render.
      *
      * @param {any} range

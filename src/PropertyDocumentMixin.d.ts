@@ -108,6 +108,14 @@ interface PropertyDocumentMixin extends AmfHelperMixin {
   _computeIsArray(range: Object): boolean;
 
   /**
+   * Computes value for `isAnyOf` property.
+   * AnyOf type is identified as a `http://www.w3.org/ns/shacl#or`
+   * 
+   * @param range Range object of current shape.
+   */
+  _computeIsAnyOf(range: Object): boolean
+
+  /**
    * Computes list of type labels to render.
    *
    * @param {Object} range

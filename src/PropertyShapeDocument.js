@@ -114,6 +114,10 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
        */
       opened: { type: Boolean },
       renderReadOnly: { type: Boolean },
+      /**
+       * Computed value from the shape. True if the property is an anyOf
+       */
+      isAnyOf: { type: Boolean },
     };
   }
 
@@ -231,10 +235,12 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     this.isArray = this._computeIsArray(range);
     this.isEnum = this._computeIsEnum(range, this.isArray);
     this.isReadOnly = this._isReadOnly(range);
+    this.isAnyOf = this._computeIsAnyOf(range);
     this.isComplex = this._computeIsComplex(
       this.isUnion,
       this.isObject,
-      this.isArray
+      this.isArray,
+      this.isAnyOf
     );
     this.isScalarArray = this.isArray
       ? this._computeIsScalarArray(range)
@@ -418,8 +424,8 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
    * @param {boolean} isArray
    * @return {boolean}
    */
-  _computeIsComplex(isUnion, isObject, isArray) {
-    return isUnion || isObject || isArray;
+  _computeIsComplex(isUnion, isObject, isArray, isAnyOf) {
+    return isUnion || isObject || isArray || isAnyOf;
   }
 
   _evaluateGraph() {
