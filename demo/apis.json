@@ -10,6 +10,7 @@
   "APIC-282/APIC-282.raml": "RAML 1.0",
   "APIC-483/APIC-483.raml": "RAML 1.0",
   "APIC-631/APIC-631.raml": "RAML 1.0",
+  "SE-19500/SE-19500.raml": "RAML 1.0",
   "APIC-429/APIC-429.yaml": { "type": "OAS 3.0", "mime": "application/yaml" },
   "new-oas3-types/new-oas3-types.yaml": { "type": "OAS 3.0", "mime": "application/yaml" },
   "oas-api/read-only-properties.yaml": { "type": "OAS 3.0", "mime": "application/yaml" }
