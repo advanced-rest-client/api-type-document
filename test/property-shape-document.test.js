@@ -646,6 +646,36 @@ describe('PropertyShapeDocument', () => {
     });
   });
 
+  describe('SE-17897', () => {
+    [
+      ['Regular model', false],
+      ['Compact model', true],
+    ].forEach((item) => {
+      describe(String(item[0]), () => {
+        let element = /** @type PropertyShapeDocument */ (null);
+        let amf;
+
+        before(async () => {
+          amf = await AmfLoader.load(item[1], 'SE-17897')
+        });
+
+        beforeEach(async () => {
+          element = await basicFixture();
+          element.amf = amf;
+        });
+
+        it('sets shape description when schema does not have one', async () => {
+          const [parameter] = AmfLoader.lookupParameters(amf, '/default', 'post');
+          element.shape = parameter;
+          await nextFrame();
+          assert.isFalse(element.hasPropertyDescription);
+          assert.isTrue(element.hasShapeDescription);
+          assert.equal(element.shapeDescription, 'The ConversationId uniquely identifies the message sent from the sender to the receiver. \n');
+        });
+      });
+    });
+  });
+
   // this API does not produce amf_inline_type anymore
   // nor any inn the demos
   describe.skip('APIC-282', () => {

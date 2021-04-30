@@ -7,11 +7,11 @@ paths:
   /default:
     post:
       parameters:
-        - in: header
+        - in: query
           name: conversationId
           required: false
           description: >
-            The ConversationId uniquely identifies the message sent from the sender to the receiver. 
+            The ConversationId uniquely identifies the message sent from the sender to the receiver.
           schema:
             type: string
             format: uuid

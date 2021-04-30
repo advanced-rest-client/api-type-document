@@ -94,10 +94,20 @@ export class PropertyShapeDocument extends  PropertyDocumentMixin(LitElement) {
    */
   propertyDescription: string;
   /**
+   * A description of the shape to render.
+   * @attribute
+   */
+  shapeDescription: string;
+  /**
    * Computed value, true if description is set.
    * @attribute
    */
   hasPropertyDescription: boolean;
+  /**
+   * Computed value, true if description is set.
+   * @attribute
+   */
+  hasShapeDescription: boolean;
   /**
    * A property to set when the component is rendered in the narrow
    * view. To be used with mobile rendering or when the
