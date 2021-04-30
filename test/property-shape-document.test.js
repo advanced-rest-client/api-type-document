@@ -670,7 +670,7 @@ describe('PropertyShapeDocument', () => {
           await nextFrame();
           assert.isFalse(element.hasPropertyDescription);
           assert.isTrue(element.hasShapeDescription);
-          assert.equal(element.shapeDescription, 'The ConversationId uniquely identifies the message sent from the sender to the receiver. \n');
+          assert.isTrue(element.shapeDescription.startsWith('The ConversationId uniquely identifies the message sent from the sender to the receiver.'));
         });
       });
     });
