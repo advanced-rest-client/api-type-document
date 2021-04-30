@@ -92,9 +92,17 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
        */
       propertyDescription: { type: String },
       /**
+       * A description of the shape to render.
+       */
+      shapeDescription: { type: String },      
+      /**
        * Computed value, true if description is set.
        */
       hasPropertyDescription: { type: Boolean },
+      /**
+       * Computed value, true if description is set.
+       */
+      hasShapeDescription: { type: Boolean },
       /**
        * A property to set when the component is rendered in the narrow
        * view. To be used with mobile rendering or when the
@@ -223,6 +231,10 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     }
     this.range = this._computeRange(shape);
     this.isRequired = this._computeIsRequired(shape);
+    this.shapeDescription = this._computeDescription(shape);
+    this.hasShapeDescription = this._computeHasStringValue(
+      this.shapeDescription
+    );
   }
 
   _rangeChanged(range) {
@@ -564,11 +576,11 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
    * @return {TemplateResult|string} Template for the description
    */
   _descriptionTemplate() {
-    if (!this.hasPropertyDescription) {
+    if (!(this.hasPropertyDescription || this.hasShapeDescription)) {
       return '';
     }
     return html`
-      <arc-marked .markdown="${this.propertyDescription}" sanitize>
+      <arc-marked .markdown="${this.propertyDescription || this.shapeDescription}" sanitize>
         <div slot="markdown-html" class="markdown-body"></div>
       </arc-marked>
     `;
