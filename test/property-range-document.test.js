@@ -182,6 +182,14 @@ describe('PropertyRangeDocument', () => {
           const result = element._computeEnumValues(range);
           assert.deepEqual(result, ['1', '2', '3']);
         });
+
+        it('Returns list of properties for array', async () => {
+          const data = await AmfLoader.loadType('TrademarkPierreNotWorkingType', item[1], 'enum-test');
+          element.amf = data[0];
+          const range = element._resolve(data[1]);
+          const result = element._computeEnumValues(range, true);
+          assert.deepEqual(result, ['NON_USE', 'INTERNATIONAL_REGISTRATION', 'REGULATED', 'SERIES']);
+        });
       });
     });
   });
