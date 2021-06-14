@@ -164,4 +164,22 @@ export default css`
     background-color: var(--api-type-readonly-property-background-color, #ff9292);
     color: var(--api-type-readonly-property-color, black);
   }
+
+  :host([deprecated]) .property-title {
+    color: gray;
+    text-decoration: line-through;
+  }
+
+  :host([deprecated]) .property-traits > span {
+    background-color: var(--api-type-document-type-deprecated-background-color, gray);
+    color: var(--api-type-document-type-deprecated-color, white);
+  }
+
+  .deprecated-warning {
+    background-color: var(--api-type-document-deprecated-warning-background-color, rgb(150, 150, 150));
+    color: var(--api-type-document-deprecated-warning-color, rgb(50,50,50));
+    padding: var(--api-type-document-deprecated-warning-padding, 3px 6px);
+    border-radius: var(--api-type-document-deprecated-warning-border-radius, 3px);
+    display: inline-flex;
+  }
 `;
