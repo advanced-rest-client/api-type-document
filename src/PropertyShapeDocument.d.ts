@@ -133,6 +133,11 @@ export class PropertyShapeDocument extends  PropertyDocumentMixin(LitElement) {
    * @attribute
    */
   renderReadOnly: boolean;
+  /**
+   * Determines if shape's range is deprecated
+   * @attribute
+   */
+  deprecated: boolean
 
   get complexToggleLabel(): string;
 

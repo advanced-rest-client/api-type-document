@@ -126,6 +126,9 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
        * Computed value from the shape. True if the property is an anyOf
        */
       isAnyOf: { type: Boolean },
+      /**
+       * Determines if shape's range is deprecated
+       */
       deprecated: { type: Boolean, reflect: true },
     };
   }
@@ -272,7 +275,6 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     this.propertyDataType = this._computeObjectDataType(range, shape);
     const isDeprecated = Boolean(this._computeIsDeprecated(range));
     this.deprecated = isDeprecated;
-    console.log('is deprecated:', isDeprecated)
   }
 
   _computeIsDeprecated(range) {
