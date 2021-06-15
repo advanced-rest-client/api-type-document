@@ -676,6 +676,34 @@ describe('PropertyShapeDocument', () => {
     });
   });
 
+  describe('Deprecated properties', () => {
+    [
+      ['Regular model', false],
+      ['Compact model', true],
+    ].forEach(([label, compact]) => {
+      describe(String(label), () => {
+        let amf;
+        let type;
+
+        before(async () => {
+          [amf, type] = await AmfLoader.loadType('Manufacturer', compact, 'APIC-649');
+        });
+
+        it('should set `deprecated` property', async () => {
+          const shape = AmfLoader.lookupPropertyShape(amf, type, 'name');
+          const element = await modelFixture(amf, shape);
+          assert.isTrue(element.deprecated);
+        });
+
+        it('should set render deprecated warning message', async () => {
+          const shape = AmfLoader.lookupPropertyShape(amf, type, 'name');
+          const element = await modelFixture(amf, shape);
+          assert.exists(element.shadowRoot.querySelector('.deprecated-warning'));
+        });
+      });
+    });
+  });
+
   // this API does not produce amf_inline_type anymore
   // nor any inn the demos
   describe.skip('APIC-282', () => {
