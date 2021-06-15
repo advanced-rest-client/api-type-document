@@ -99,8 +99,9 @@ class ApiDemo extends ApiDemoPage {
 
   _apiListTemplate() {
     return [
-      ['APIC-429', 'APIC 429'],
       ['demo-api', 'Demo API'],
+      ['APIC-649', 'Deprecated properties'],
+      ['APIC-429', 'APIC 429'],
       ['read-only-properties', 'Read Only Properties API'],
       ['examples-api', 'Examples render demo'],
       ['Petstore', 'OAS: Petstore'],
