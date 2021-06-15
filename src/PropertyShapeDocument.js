@@ -646,7 +646,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     if (!this.deprecated) {
       return '';
     }
-    return html`<div class="deprecated-warning">Warning: This property has been deprecated</div>`
+    return html`<div class="deprecated-warning">Warning: Deprecated</div>`
   }
 
   /**
