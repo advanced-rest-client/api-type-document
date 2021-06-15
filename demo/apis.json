@@ -14,5 +14,6 @@
   "APIC-429/APIC-429.yaml": { "type": "OAS 3.0", "mime": "application/yaml" },
   "SE-17897/SE-17897.yaml": { "type": "OAS 3.0", "mime": "application/yaml" },
   "new-oas3-types/new-oas3-types.yaml": { "type": "OAS 3.0", "mime": "application/yaml" },
-  "oas-api/read-only-properties.yaml": { "type": "OAS 3.0", "mime": "application/yaml" }
+  "oas-api/read-only-properties.yaml": { "type": "OAS 3.0", "mime": "application/yaml" },
+  "APIC-649/APIC-649.yaml": { "type": "OAS 3.0", "mime": "application/yaml" }
 }
