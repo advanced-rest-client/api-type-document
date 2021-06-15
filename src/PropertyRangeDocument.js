@@ -174,6 +174,9 @@ export class PropertyRangeDocument extends PropertyDocumentMixin(LitElement) {
     if (isArray) {
       model = model[inKey];
     }
+    if (Array.isArray(model)) {
+      [model] = model;
+    }
     const results = [];
     Object.keys(model).forEach((key) => {
       const amfKey = this._getAmfKey(this.ns.w3.rdfSchema.key);

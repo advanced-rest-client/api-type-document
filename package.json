@@ -45,7 +45,7 @@
     "@open-wc/testing": "^2.5.15",
     "@web/dev-server": "^0.1.8",
     "@web/test-runner": "^0.12.16",
-    "@web/test-runner-playwright": "^0.8.4",
+    "@web/test-runner-playwright": "^0.8.6",
     "eslint": "^7.21.0",
     "eslint-config-prettier": "^8.1.0",
     "husky": "^4.3.8",
