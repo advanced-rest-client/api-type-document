@@ -166,6 +166,14 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
    */
   renderReadOnly?: boolean;
 
+  /**
+   * When enabled, media selector will not be rendered.
+   * Should be used in cases where media types are not
+   * applicable.
+   * @attribute
+   */
+  noMediaSelector: { type: Boolean }
+
   constructor();
 
   connectedCallback(): void;

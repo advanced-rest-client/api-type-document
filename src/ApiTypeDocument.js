@@ -160,6 +160,13 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       _renderMainExample: { type: Boolean },
 
       renderReadOnly: { type: Boolean },
+
+      /**
+       * When enabled, media selector will not be rendered.
+       * Should be used in cases where media types are not
+       * applicable.
+       */
+      noMediaSelector: { type: Boolean },
     };
   }
 
@@ -288,6 +295,14 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     );
   }
 
+  get shouldRenderMediaSelector() {
+    const { renderMediaSelector, noMediaSelector } = this;
+    if (noMediaSelector) {
+      return false;
+    }
+    return renderMediaSelector;
+  }
+
   constructor() {
     super();
     this.hasParentType = false;
@@ -308,6 +323,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     this.renderReadOnly = false;
 
     this._isPropertyReadOnly = this._isPropertyReadOnly.bind(this);
+    this.noMediaSelector = false;
   }
 
   connectedCallback() {
@@ -819,7 +835,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     const mediaTypes = (this.mediaTypes || []);
     return html`<style>${this.styles}</style>
       <section class="examples" ?hidden="${!this._renderMainExample}">
-        ${this.renderMediaSelector
+        ${this.shouldRenderMediaSelector
           ? html`<div class="media-type-selector">
               <span>Media type:</span>
               ${mediaTypes.map((item, index) => {
