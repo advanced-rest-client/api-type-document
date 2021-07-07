@@ -1071,6 +1071,81 @@ describe('<api-type-document>', () => {
     });
   });
 
+  [
+    ['Regular model - noMediaSelector', false],
+    ['Compact model - noMediaSelector', true],
+  ].forEach(([name, compact]) => {
+    describe(String(name), () => {
+      let element = /** @type ApiTypeDocument */ (null);
+
+      beforeEach(async () => {
+        element = await basicFixture();
+        // element.amf = await AmfLoader.load(compact, 'APIC-667');
+        await nextFrame();
+        const [amf, type] = await AmfLoader.loadType(
+          'aNumberType',
+          compact,
+          'APIC-667'
+        );
+        element.amf = amf;
+        element.type = type;
+
+        let webApi = element._computeWebApi(element.amf);
+        if (webApi instanceof Array) {
+          [webApi] = webApi;
+        }
+        const key = element._getAmfKey(element.ns.aml.vocabularies.apiContract.accepts);
+        const value = element._ensureArray(webApi[key]);
+        if (value) {
+          element.mediaTypes = value.map((item) => item['@value']);
+        }
+        await nextFrame();
+      });
+
+      it('it should render media type selector', () => {
+        assert.exists(element.shadowRoot.querySelector('.media-type-selector'));
+      });
+
+      it('it should not render media type selector', async () => {
+        element.noMediaSelector = true;
+        await nextFrame();
+        assert.notExists(element.shadowRoot.querySelector('.media-type-selector'))
+      });
+    });
+  });
+
+  describe('shouldRenderMediaSelector()', () => {
+    let element = /** @type ApiTypeDocument */ (null);
+
+      beforeEach(async () => {
+        element = await basicFixture();
+      });
+
+      it('should return false when noMediaSelector is true and renderMediaSelector is false', () => {
+        element.renderMediaSelector = false;
+        element.noMediaSelector = true;
+        assert.isFalse(element.shouldRenderMediaSelector);
+      });
+
+      it('should return false when noMediaSelector is true and renderMediaSelector is true', () => {
+        element.renderMediaSelector = true;
+        element.noMediaSelector = true;
+        assert.isFalse(element.shouldRenderMediaSelector);
+      });
+
+      it('should return false when noMediaSelector is false and renderMediaSelector is false', () => {
+        element.renderMediaSelector = false;
+        element.noMediaSelector = false;
+        assert.isFalse(element.shouldRenderMediaSelector);
+      });
+
+      it('should return true when noMediaSelector is false and renderMediaSelector is true', () => {
+        element.renderMediaSelector = true;
+        element.noMediaSelector = false;
+        assert.isTrue(element.shouldRenderMediaSelector);
+      });
+  });
+
   describe('a11y', () => {
     let element = /** @type ApiTypeDocument */ (null);
 
