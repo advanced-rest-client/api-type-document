@@ -172,7 +172,9 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
    * applicable.
    * @attribute
    */
-  noMediaSelector: { type: Boolean }
+  noMediaSelector: boolean;
+
+  get shouldRenderMediaSelector(): boolean;
 
   constructor();
 
