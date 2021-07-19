@@ -51,6 +51,11 @@ export class PropertyShapeDocument extends  PropertyDocumentMixin(LitElement) {
    */
   isScalarArray: boolean;
   /**
+   * Computed value, true if current property is one of.
+   * @attribute
+   */
+  isOneOf: boolean;
+  /**
    * Computed value, true if this property contains a complex
    * structure. It is computed when the property is and array,
    * object, or union.
@@ -211,6 +216,11 @@ export class PropertyShapeDocument extends  PropertyDocumentMixin(LitElement) {
    * Computes value for `isComplex` property.
    */
   _computeIsComplex(isUnion: boolean, isObject: boolean, isArray: boolean): boolean;
+
+  /**
+   * Computes value `IsOneOf` property.
+   */
+  _computeIsOneOf(range): boolean;
 
   _evaluateGraph(): void;
 
