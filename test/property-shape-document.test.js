@@ -803,4 +803,72 @@ describe('PropertyShapeDocument', () => {
       assert.isTrue(result);
     });
   });
+
+  describe('_computeIsOneOf()', () => {
+    let element = /** @type PropertyShapeDocument */ (null);
+    let amf;
+    let type;
+
+    before(async () => {
+      const data = await AmfLoader.loadType(
+          'Subscription',
+          false,
+          'APIC-671'
+      );
+      amf = data[0];
+      type = data[1];
+    });
+
+    beforeEach(async () => {
+      element = await basicFixture();
+      element.amf = amf;
+    });
+
+    it('Returns false when no range', () => {
+      const result = element._computeIsOneOf(undefined);
+      assert.isFalse(result);
+    });
+
+    it('Returns true for oneOf property', () => {
+      const [, range] = getShapeRange(element, type, 'state');
+      const result = element._computeIsOneOf(range);
+      assert.isTrue(result);
+    });
+  });
+
+  describe('APIC-671', () => {
+    [
+      ['Regular model', false],
+      ['Compact model', true]
+    ].forEach(([label, compact]) => {
+      describe(String(label), () => {
+        let element = /** @type PropertyShapeDocument */ (null);
+        let amf;
+        let type;
+
+        before(async () => {
+          const data = await AmfLoader.loadType('Subscription', compact, 'APIC-671');
+          amf = data[0];
+          type = data[1];
+        });
+
+        beforeEach(async () => {
+          element = await basicFixture();
+          element.amf = amf;
+        });
+
+        it('sets isComplex', async () => {
+          const [, range] = getShapeRange(element, type, 'state');
+          element.range = range;
+          assert.isTrue(element.isComplex);
+        });
+
+        it('sets isOneOf', () => {
+          const [, range] = getShapeRange(element, type, 'state');
+          element.range = range;
+          assert.isTrue(element.isOneOf);
+        });
+      });
+    });
+  });
 });

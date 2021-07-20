@@ -57,6 +57,10 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
        */
       isScalarArray: { type: Boolean, reflect: true },
       /**
+       * Computed value, true if current property is one of.
+       */
+      isOneOf: { type: Boolean, reflect: true, },
+      /**
        * Computed value, true if this property contains a complex
        * structure. It is computed when the property is and array,
        * object, or union.
@@ -242,6 +246,20 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     );
   }
 
+  /**
+   * Computes value `IsOneOf` property.
+   * @param {Object} range Current `range` object
+   * @return {Boolean}
+   */
+  _computeIsOneOf(range) {
+    if (!range) {
+      return false;
+    }
+
+    const oneOfKey = this._getAmfKey(this.ns.w3.shacl.xone);
+    return oneOfKey in range;
+  }
+
   _rangeChanged(range) {
     this.propertyDescription = this._computeDescription(range);
     this.hasPropertyDescription = this._computeHasStringValue(
@@ -253,11 +271,13 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     this.isEnum = this._computeIsEnum(range, this.isArray);
     this.isReadOnly = this._isReadOnly(range);
     this.isAnyOf = this._computeIsAnyOf(range);
+    this.isOneOf = this._computeIsOneOf(range);
     this.isComplex = this._computeIsComplex(
       this.isUnion,
       this.isObject,
       this.isArray,
-      this.isAnyOf
+      this.isAnyOf,
+      this.isOneOf
     );
     this.isScalarArray = this.isArray
       ? this._computeIsScalarArray(range)
@@ -447,8 +467,8 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
    * @param {boolean} isArray
    * @return {boolean}
    */
-  _computeIsComplex(isUnion, isObject, isArray, isAnyOf) {
-    return isUnion || isObject || isArray || isAnyOf;
+  _computeIsComplex(isUnion, isObject, isArray, isAnyOf, isOneOf) {
+    return isUnion || isObject || isArray || isAnyOf || isOneOf;
   }
 
   _evaluateGraph() {
