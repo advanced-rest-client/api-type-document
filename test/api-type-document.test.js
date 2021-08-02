@@ -117,6 +117,11 @@ describe('<api-type-document>', () => {
         const result = element._computeRenderMainExample(true, true);
         assert.isFalse(result);
       });
+
+      it('Returns false when type is scalar', () => {
+        const result = element._computeRenderMainExample(true, true, true);
+        assert.isFalse(result);
+      });
     });
   });
 
@@ -563,6 +568,13 @@ describe('<api-type-document>', () => {
             'property-shape-document.union-document'
           );
           assert.notOk(doc);
+        });
+
+        it('Does not render main example', () => {
+          const examples = element.shadowRoot.querySelector(
+            'examples'
+          );
+          assert.notOk(examples);
         });
       });
 

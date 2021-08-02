@@ -289,9 +289,11 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     }
     this.__hasExamples = value;
     this.requestUpdate('_hasExamples', old);
+    const scalarType = this._hasType(this.type, this.ns.aml.vocabularies.shapes.ScalarShape);
     this._renderMainExample = this._computeRenderMainExample(
       this.noMainExample,
-      value
+      value,
+      scalarType
     );
   }
 
@@ -337,8 +339,8 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     }
   }
 
-  _computeRenderMainExample(noMainExample, hasExamples) {
-    return !!(!noMainExample && hasExamples);
+  _computeRenderMainExample(noMainExample, hasExamples, isScalar = false) {
+    return isScalar ? false : !!(!noMainExample && hasExamples);
   }
 
   /**
