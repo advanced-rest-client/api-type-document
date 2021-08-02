@@ -180,7 +180,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
 
   connectedCallback(): void;
 
-  _computeRenderMainExample(noMainExample: boolean, hasExamples: boolean): boolean;
+  _computeRenderMainExample(noMainExample: boolean, hasExamples: boolean, isScalar: boolean): boolean;
 
   /**
    * Called when resolved type or amf changed.
