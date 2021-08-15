@@ -655,57 +655,48 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
   /**
    * @return {TemplateResult} Templates for object properties
    */
-  _arrayTemplate() {
+   _arrayTemplate() {
     const items = this._computeArrayProperties(this._resolvedType) || [];
-    return html`
-      ${this.hasParentType
-        ? html`<property-shape-document
-            class="array-document"
-            .amf="${this.amf}"
-            .shape="${this._resolvedType}"
-            .parentTypeName="${this.parentTypeName}"
-            ?narrow="${this.narrow}"
-            ?noExamplesActions="${this.noExamplesActions}"
-            ?compatibility="${this.compatibility}"
-            .mediaType="${this.mediaType}"
-            ?graph="${this.graph}"
-          ></property-shape-document>`
-        : html`<span>Array of:</span>`}
-
-      <div class="array-children">
-        ${items.map(
-          (item) => html`
-            ${item.isShape
-              ? html`<property-shape-document
-                  class="array-document"
-                  .amf="${this.amf}"
-                  .shape="${item}"
-                  parentTypeName="${this._computeArrayParentName(this.parentTypeName)}"
-                  ?narrow="${this.narrow}"
-                  ?noExamplesActions="${this.noExamplesActions}"
-                  ?compatibility="${this.compatibility}"
-                  .mediaType="${this.mediaType}"
-                  ?graph="${this.graph}"
-                ></property-shape-document>`
-              : ''}
-            ${item.isType
-              ? html`<api-type-document
-                  class="union-document"
-                  .amf="${this.amf}"
-                  .parentTypeName="${this.parentTypeName}"
-                  .type="${item}"
-                  ?narrow="${this.narrow}"
-                  ?noExamplesActions="${this.noExamplesActions}"
-                  ?noMainExample="${this._renderMainExample}"
-                  ?compatibility="${this.compatibility}"
-                  .mediaType="${this.mediaType}"
-                  ?graph="${this.graph}"
-                ></api-type-document>`
-              : ''}
-          `
-        )}
-      </div>
-    `;
+    const documents = items.map(
+      (item) => html`
+        ${item.isShape
+          ? html`<property-shape-document
+              class="array-document"
+              .amf="${this.amf}"
+              .shape="${item}"
+              parentTypeName="${this._computeArrayParentName(this.parentTypeName)}"
+              ?narrow="${this.narrow}"
+              ?noExamplesActions="${this.noExamplesActions}"
+              ?compatibility="${this.compatibility}"
+              .mediaType="${this.mediaType}"
+              ?graph="${this.graph}"
+            ></property-shape-document>`
+          : ''}
+        ${item.isType
+          ? html`<api-type-document
+              class="union-document"
+              .amf="${this.amf}"
+              .parentTypeName="${this.parentTypeName}"
+              .type="${item}"
+              ?narrow="${this.narrow}"
+              ?noExamplesActions="${this.noExamplesActions}"
+              ?noMainExample="${this._renderMainExample}"
+              ?compatibility="${this.compatibility}"
+              .mediaType="${this.mediaType}"
+              ?graph="${this.graph}"
+            ></api-type-document>`
+          : ''}
+      `
+    );
+    if (!this.hasParentType) {
+      return html`
+        <span>Array of:</span>
+        <div class="array-children">
+          ${documents}
+        </div>
+      `;
+    }
+    return html`${documents}`;
   }
 
   /**
