@@ -499,19 +499,19 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
       dElm[0],
       this.ns.aml.vocabularies.docSourceMaps.element
     );
-    this._targetTypeId = id;
     const type = this._getType(amf, id);
     if (!type) {
       return;
     }
 
+    this._targetTypeId = id;
     this._targetTypeName = this._getValue(type, this.ns.w3.shacl.name);
   }
 
   _getType(amf, id) {
-    const dcs = this._computeDeclares(amf);
-    let refs; // this._computeReferences(amf);
-    return this._computeType(dcs, refs, id);
+    const declares = this._computeDeclares(amf);
+    const refs = this._computeReferences(amf);
+    return this._computeType(declares, refs, id);
   }
 
   _navigateType() {
