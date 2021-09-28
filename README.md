@@ -1,10 +1,8 @@
-[![Published on NPM](https://img.shields.io/npm/v/@api-components/api-type-document.svg)](https://www.npmjs.com/package/@api-components/api-type-document)
+# DEPRECATED
 
-[![Build Status](https://travis-ci.com/advanced-rest-client/api-type-document.svg)](https://travis-ci.com/advanced-rest-client/api-type-document)
+This component is being deprecated. The code base has been moved to [api-documentation](https://github.com/advanced-rest-client/api-documentation) module. This module will be archived when [PR 37](https://github.com/advanced-rest-client/api-documentation/pull/37) is merged.
 
-[![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/advanced-rest-client/api-type-document)
-
-## &lt;api-type-document&gt;
+-----
 
 A documentation table for RAML type / OAS schema properties. Works with AMF data model.
 
@@ -19,7 +17,7 @@ For compatibility with previous model version use `3.x.x` version of the compone
 
 Custom property | Description | Default
 ----------------|-------------|----------
-`--api-type-document` | Mixin applied to this elment | `{}`
+`--api-type-document` | Mixin applied to this element | `{}`
 `--api-type-document-union-button-background-color` | Background color of union selector button | `#fff`
 `--api-type-document-union-button-color` | Color of union selector button | `#000`
 `--api-type-document-union-button-active-background-color` | Background color of active union selector button | `#CDDC39`
@@ -29,7 +27,7 @@ From `property-shape-document`
 
 Custom property | Description | Default
 ----------------|-------------|----------
-`--property-shape-document` | Mixin applied each proeprty element | `{}`
+`--property-shape-document` | Mixin applied each property element | `{}`
 `--property-shape-document-array-color` | Property border color when type is an array | `#8BC34A`
 `--property-shape-document-object-color` | Property border color when type is an object | `#FF9800`
 `--property-shape-document-union-color` | Property border color when type is an union | `#FFEB3B`
@@ -41,17 +39,17 @@ Custom property | Description | Default
 `--api-type-document-type-color` | Color of the "type" trait | `white`
 `--api-type-document-type-background-color` | Background color of the "type" trait | `#2196F3`
 `--api-type-document-trait-background-color` | Background color to main range trait (type, required, enum) | `#EEEEEE`,
-`--api-type-document-trait-border-radius` | Border radious of a main property traits like type, required, enum | `3px`
+`--api-type-document-trait-border-radius` | Border radius of a main property traits like type, required, enum | `3px`
 
 From `property-range-document`
 
 Custom property | Description | Default
 ----------------|-------------|----------
-`--property-range-document` | Mixin applied to this elment | `{}`
+`--property-range-document` | Mixin applied to this element | `{}`
 `--api-type-document-type-attribute-color` | Color of each attribute that describes a property | `#616161`
 `--api-type-document-examples-title-color` | Color of examples section title | ``
 `--api-type-document-examples-border-color` | Example section border color | `transparent`
-`--code-background-color` | Background color of the examples section | ``
+ `--code-background-color` | Background color of the examples section |``
 `--arc-font-body1` | Mixin applied to an example name label | `{}`
 `--arc-font-body2` | Mixin applied to the examples section title | `{}`
 
