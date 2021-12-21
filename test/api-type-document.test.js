@@ -2,9 +2,9 @@
 import { fixture, assert, nextFrame, aTimeout, waitUntil } from '@open-wc/testing'
 import { AmfLoader } from './amf-loader.js';
 import '../api-type-document.js';
-import { PropertyShapeDocument } from '../src/PropertyShapeDocument.js';
 
 /** @typedef {import('..').ApiTypeDocument} ApiTypeDocument */
+/** @typedef {import('..').PropertyShapeDocument} PropertyShapeDocument */
 
 describe('<api-type-document>', () => {
   const newOas3Types = 'new-oas3-types';
