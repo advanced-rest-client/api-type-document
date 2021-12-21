@@ -345,6 +345,18 @@ const mxFunction = (base) => {
       return this._hasProperty(range, this.ns.w3.shacl.or);
     }
 
+
+    /**
+     * Computes value for `isAllOf` property.
+     * Returns true if `and` property is present in shape. Otherwise returns false.
+     *
+     * @param {Object} range Range object of current shape.
+     * @returns {boolean}
+     */
+    _computeIsAllOf(range) {
+      return this._hasProperty(range, this.ns.w3.shacl.and);
+    }
+
     /**
      * Computes list of type labels to render.
      *

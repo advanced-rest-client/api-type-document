@@ -272,12 +272,14 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     this.isReadOnly = this._isReadOnly(range);
     this.isAnyOf = this._computeIsAnyOf(range);
     this.isOneOf = this._computeIsOneOf(range);
+    this.isAllOf = this._computeIsAllOf(range);
     this.isComplex = this._computeIsComplex(
       this.isUnion,
       this.isObject,
       this.isArray,
       this.isAnyOf,
-      this.isOneOf
+      this.isOneOf,
+      this.isAllOf
     );
     this.isScalarArray = this.isArray
       ? this._computeIsScalarArray(range)
@@ -465,10 +467,13 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
    * @param {boolean} isUnion
    * @param {boolean} isObject
    * @param {boolean} isArray
+   * @param {boolean} isAnyOf
+   * @param {boolean} isOneOf
+   * @param {boolean} isAllOf
    * @return {boolean}
    */
-  _computeIsComplex(isUnion, isObject, isArray, isAnyOf, isOneOf) {
-    return isUnion || isObject || isArray || isAnyOf || isOneOf;
+  _computeIsComplex(isUnion, isObject, isArray, isAnyOf, isOneOf, isAllOf) {
+    return isUnion || isObject || isArray || isAnyOf || isOneOf || isAllOf;
   }
 
   _evaluateGraph() {

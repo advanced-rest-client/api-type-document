@@ -1,0 +1,367 @@
+openapi: 3.0.0
+info:
+  title: safeco-xapi
+  description: |-
+    # safeco-api specification
+    ---
+    ## Initial Draft
+  version: v0
+
+paths:
+  /ping:
+    get:
+      security:
+      - oauth_2_0:
+         - manage:scope               
+      tags:
+        - Ping
+      summary: Get api status 
+      responses:
+        '200': 
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/pingResponse"
+
+  /rates:
+   post:
+    security:
+    - oauth_2_0:
+        - manage:scope   
+    tags:
+        - Rate
+    summary: "Get the rates for pet insurance premiums by passing necessary information"
+    requestBody:
+      required: true
+      content: 
+        application/json:
+          schema:
+            $ref: '#/components/schemas/getRateRequest'
+    responses:
+      '201' :
+        description: success
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getRateResponse'
+              
+      '400':
+          $ref: "#/components/responses/badRequest400"
+      '401':
+          $ref: "#/components/responses/unauthorised401"
+      '404':
+          $ref: "#/components/responses/notFound404"
+      '5XX':
+          $ref: "#/components/responses/serverError5XX"   
+ 
+ 
+components:
+  securitySchemes:
+    oauth_2_0:
+      type: oauth2
+      description: This API supports OAuth 2.0 for authenticating all API requests.
+      flows:
+        authorizationCode: 
+          authorizationUrl: https://petscovered.okta.com/oauth2/default/v1/authorize
+          tokenUrl: https://petscovered.okta.com/oauth2/default/v1/token
+          scopes:
+            manage:scope: Manage scope for resource 
+            
+            
+  schemas:
+    getRateRequest:
+      type: object
+      properties:
+        producer:
+          description: Details of Producer or Agent related with the request.
+          allOf: 
+          - $ref: "#/components/schemas/commonNameProperties"
+          - $ref: "#/components/schemas/commonAddressProperties"          
+          - $ref : '#/components/schemas/producerProperties'
+          required: 
+            - producerId
+            - isActive
+            - lastName
+        customer:
+          description: Details of Customer related with the request.
+          allOf: 
+          - $ref: "#/components/schemas/commonNameProperties"
+          - $ref: "#/components/schemas/commonAddressProperties"
+          - $ref : '#/components/schemas/customerProperties'
+          required: 
+            - lastName
+            - email
+        pet:
+          $ref : '#/components/schemas/pet'
+        ratingFactors:
+          type: array
+          description: Each rating as a separate object with unique setName property. Duplicate setName properties are not processed.
+          items:
+            $ref : '#/components/schemas/ratingFactor'
+      required: 
+        - producer
+        - customer
+        - pet
+        - ratingFactors
+    
+      
+    getRateResponse:
+      type: object
+      properties:
+        leadId: 
+          type: string
+          example: "4224901b30414542e46c01394baa190e"
+        petId:
+          type: string
+          example: "405ea8b7b7708033116ba6f2adb89c92"
+        rates:
+          $ref : '#/components/schemas/rates'
+    
+    
+    pingResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        code: 
+          type: number
+          example: 200
+        status:
+          type: string
+          example: Alive
+        env:
+          type: string
+          example: dev
+        moduleName: 
+          type: string
+          example: safeco-api      
+    
+    commonNameProperties:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: "Leonel"
+        middleName:
+          type: string
+          example: "Andreas"
+        lastName:
+          type: string
+          example: "Messi"
+    
+    commonAddressProperties:
+      type: object
+      properties:
+        address:
+          type: string
+          example: "221B Baker Street"
+        addressCont:
+          type: string
+          example: "Near Scotland Yard"
+        city:
+          type: string
+          example: "New York"
+        state:
+          type: string
+          example: "IN"
+        zip:
+          type: string
+          example: "85001"        
+
+    
+    producerProperties:
+      type: object
+      properties:
+        producerId:
+          type: string
+          example: "1234567890"
+        npn:
+          type: string
+          example: "1234567890"
+        type:
+          type: string
+          example: " "
+        mobilePhone:
+          type: string
+          example: "987898799"
+        officePhone:
+          type: string
+          example: "02166728988"
+        email:
+          type: string
+          example: "insurance.agent@companionprotect.com"
+        websiteUrl:
+          type: string
+          example: "www.companionprotect.com"
+        managerId:
+          type: string
+          example: "b12F005"
+        locationId:
+          type: string
+          example: "0AB234"
+        locationName:
+          type: string
+          example: "xyz"
+        isActive:
+          type: boolean
+          example: true
+        riskState:
+          type: string
+          example: ""  
+
+    
+      
+    customerProperties:
+      type: object
+      properties:
+        leadId:
+          type: string
+          example: "4224901b30414542e46c01394baa190e"
+        phone:
+          type: string
+          example: "5052331872"
+        email:
+          type: string
+          example: "abc@gmail.com"
+      required: 
+        - email
+      
+    
+    pet:
+      description: Details of the pet related with the request.
+      type: object
+      properties:
+        name:
+          type: string
+          example: "max"
+        species:
+          type: string
+          example: "Dog"
+        breed:
+          type: string
+          example: "akita"
+        gender:
+          type: string
+          example: "Male"
+        ageInYears:
+          type: integer
+          example: 4
+      required:
+        - name
+        - species
+        - breed
+    
+    
+    ratingFactor:
+      type: object
+      properties:
+        setName:
+          type: string
+          example: "option1"
+        deductible:
+          type: number
+          example: 90
+        reimbursement:
+          type: number
+          example: 200
+        annualLimit:
+         type: number
+         example: 10000
+      required:
+        - setName
+        - deductible
+        - reimbursement
+        - annualLimit
+    
+    
+    rates:
+      type: array
+      items:
+        type: object
+        properties:
+          setName:
+            type: string
+            example: "name"
+          premiumAmount:
+            type: number
+            multipleOf: 0.01
+            example: 48.6
+          wellnessPremiumAmount:
+            type: number
+            multipleOf: 0.01
+            example: 48.48
+          totalMonthlyPremiumAmount:
+            type: number
+            multipleOf: 0.01
+            example: 8.09
+          totalAnnualPremiumAmount:
+            type: number
+            multipleOf: 0.01
+            example: 97.08
+    
+    
+      
+  responses:   
+    badRequest400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                badRequest400:
+                  $ref: "#/components/examples/badRequest400"   
+    unauthorised401:
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                unauthorised401:
+                  $ref: "#/components/examples/unauthorised401"   
+    serverError5XX:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                serverError5xx:
+                  $ref: "#/components/examples/serverError5XX"       
+    notFound404:
+          description: Resource Notfound
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                notFound404:
+                  $ref: "#/components/examples/notFound404"       
+  examples:
+    badRequest400:
+      value:
+        success: false
+        code: 400
+        reasonCode: Bad Request
+        message: Required header Authorization not specified
+    unauthorised401:
+      value:
+        success: false
+        code: 401
+        reasonCode: Unauthorised
+        message: unauthorised request    
+    notFound404:
+      value:
+        success: false
+        code: 404
+        reasonCode: Resource Not found
+        message: requested resource not found or does not exist 
+    serverError5XX:
+      value:
+        success: false
+        code: 500
+        reasonCode: Internal Server Error
+        message: Internal Server Error

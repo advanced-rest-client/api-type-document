@@ -115,6 +115,17 @@ interface PropertyDocumentMixin extends AmfHelperMixin {
    */
   _computeIsAnyOf(range: Object): boolean
 
+
+  /**
+   * Computes value for `isAllOf` property.
+   * AllOf type is identified as `http://www.w3.org/ns/shacl#and`
+   * Returns true if `and` property is present in shape. Otherwise returns false.
+   *
+   * @param {Object} range Range object of current shape.
+   * @returns {boolean}
+   */
+  _computeIsAllOf(range: Object): boolean
+
   /**
    * Computes list of type labels to render.
    *

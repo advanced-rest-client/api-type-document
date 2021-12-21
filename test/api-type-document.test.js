@@ -1,9 +1,10 @@
 /* eslint-disable prefer-destructuring */
-import { fixture, assert, nextFrame, aTimeout } from '@open-wc/testing';
+import { fixture, assert, nextFrame, aTimeout, waitUntil } from '@open-wc/testing'
 import { AmfLoader } from './amf-loader.js';
 import '../api-type-document.js';
 
 /** @typedef {import('..').ApiTypeDocument} ApiTypeDocument */
+/** @typedef {import('..').PropertyShapeDocument} PropertyShapeDocument */
 
 describe('<api-type-document>', () => {
   const newOas3Types = 'new-oas3-types';
@@ -755,6 +756,28 @@ describe('<api-type-document>', () => {
             element.shadowRoot.querySelectorAll('property-shape-document'),
             2
           );
+        });
+      });
+
+      describe('APIC-743', () => {
+        let element = /** @type ApiTypeDocument */ (null);
+
+        beforeEach(async () => {
+          const data = await AmfLoader.loadType('getRateRequest', item[1], 'APIC-743');
+          element = await basicFixture();
+          element.amf = data[0];
+          element.type = data[1];
+        });
+
+        it('should render "Show" button for type\'s "allOf" property', async () => {
+          let producerNode = /** @type {PropertyShapeDocument} */ (null);
+          await waitUntil(() => {
+            const propertyShapeDocumentNodes = Array.from(element.shadowRoot.querySelectorAll('property-shape-document'));
+            producerNode = propertyShapeDocumentNodes.find(node => node.propertyName === 'producer');
+            return Boolean(producerNode);
+          }, 'Could not find "producer" property-shape-document node');
+          const showButton = producerNode.shadowRoot.querySelector('anypoint-button.complex-toggle');
+          assert.exists(showButton, '"producer" node did not have the "Show" button');
         });
       });
     });
