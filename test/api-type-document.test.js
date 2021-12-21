@@ -1,7 +1,8 @@
 /* eslint-disable prefer-destructuring */
-import { fixture, assert, nextFrame, aTimeout } from '@open-wc/testing';
+import { fixture, assert, nextFrame, aTimeout, waitUntil } from '@open-wc/testing'
 import { AmfLoader } from './amf-loader.js';
 import '../api-type-document.js';
+import { PropertyShapeDocument } from '../src/PropertyShapeDocument.js';
 
 /** @typedef {import('..').ApiTypeDocument} ApiTypeDocument */
 
@@ -766,13 +767,16 @@ describe('<api-type-document>', () => {
           element = await basicFixture();
           element.amf = data[0];
           element.type = data[1];
-          await aTimeout(50);
         });
 
-        it('should render "Show" button for type\'s "allOf" property', () => {
-          const psdNode = Array.from(element.shadowRoot.querySelectorAll('property-shape-document')).find(node => node.propertyName === 'producer');
-          assert.exists(psdNode, 'Could not find "producer" property-shape-document node');
-          const showButton = psdNode.shadowRoot.querySelector('anypoint-button.complex-toggle');
+        it('should render "Show" button for type\'s "allOf" property', async () => {
+          let producerNode = /** @type {PropertyShapeDocument} */ (null);
+          await waitUntil(() => {
+            const propertyShapeDocumentNodes = Array.from(element.shadowRoot.querySelectorAll('property-shape-document'));
+            producerNode = propertyShapeDocumentNodes.find(node => node.propertyName === 'producer');
+            return Boolean(producerNode);
+          }, 'Could not find "producer" property-shape-document node');
+          const showButton = producerNode.shadowRoot.querySelector('anypoint-button.complex-toggle');
           assert.exists(showButton, '"producer" node did not have the "Show" button');
         });
       });
