@@ -757,6 +757,25 @@ describe('<api-type-document>', () => {
           );
         });
       });
+
+      describe('APIC-743', () => {
+        let element = /** @type ApiTypeDocument */ (null);
+
+        beforeEach(async () => {
+          const data = await AmfLoader.loadType('getRateRequest', item[1], 'APIC-743');
+          element = await basicFixture();
+          element.amf = data[0];
+          element.type = data[1];
+          await aTimeout(50);
+        });
+
+        it('should render "Show" button for type\'s "allOf" property', () => {
+          const psdNode = Array.from(element.shadowRoot.querySelectorAll('property-shape-document')).find(node => node.propertyName === 'producer');
+          assert.exists(psdNode, 'Could not find "producer" property-shape-document node');
+          const showButton = psdNode.shadowRoot.querySelector('anypoint-button.complex-toggle');
+          assert.exists(showButton, '"producer" node did not have the "Show" button');
+        });
+      });
     });
   });
 
