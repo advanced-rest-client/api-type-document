@@ -190,10 +190,9 @@ const mxFunction = (base) => {
           return 'Boolean';
         case this._getAmfKey(sc.dateTime):
         case sc.dateTime:
-          return 'DateTime';
         case this._getAmfKey(rs.dateTimeOnly):
         case rs.dateTimeOnly:
-          return 'Time';
+          return 'DateTime';
         case this._getAmfKey(sc.time):
         case sc.time:
           return 'Time';
