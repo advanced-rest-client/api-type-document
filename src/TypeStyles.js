@@ -85,4 +85,15 @@ export default css`
   .union-type-selector {
     margin: 12px 0;
   }
+
+  .property-attribute {
+    margin: 4px 0;
+    padding: 0;
+    color: var(--api-type-document-type-attribute-color, #616161);
+  }
+
+  .attribute-label {
+    font-weight: var(--api-type-document-property-range-attribute-label-font-weight, 500);
+    margin-right: 12px;
+  }
 `;

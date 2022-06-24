@@ -13,6 +13,7 @@
   "SE-19500/SE-19500.raml": "RAML 1.0",
   "enum-test/enum-test.raml": "RAML 1.0",
   "APIC-667/APIC-667.raml": "RAML 1.0",
+  "array-type/array-type.raml": "RAML 1.0",
   "APIC-429/APIC-429.yaml": { "type": "OAS 3.0", "mime": "application/yaml" },
   "SE-17897/SE-17897.yaml": { "type": "OAS 3.0", "mime": "application/yaml" },
   "new-oas3-types/new-oas3-types.yaml": { "type": "OAS 3.0", "mime": "application/yaml" },
