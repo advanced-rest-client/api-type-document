@@ -1,0 +1,18 @@
+#%RAML 1.0
+title: 00193743
+
+types:
+  Email:
+    type: object
+    properties:
+      name:
+        type: string
+  Emails:
+    type: array
+    items: Email
+    minItems: 1
+    maxItems: 3
+    uniqueItems: true
+  Other:
+    type: string
+    minLength: 2

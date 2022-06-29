@@ -652,6 +652,25 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     );
   }
 
+  _arrayPropertyTemplate(label, value, title) {
+    return html`
+        <div class="property-attribute" part="property-attribute">
+          <span class="attribute-label" part="attribute-label">${label}</span>
+          <span class="attribute-value" part="attribute-value" title=${title}>${value}</span>
+        </div>
+        `
+  }
+
+  _arrayPropertiesTemplate() {
+    const minCount = this._getValue(this._resolvedType, this.ns.w3.shacl.minCount)
+    const maxCount = this._getValue(this._resolvedType, this.ns.w3.shacl.maxCount)
+
+    return html`
+      ${minCount !== undefined ? this._arrayPropertyTemplate('Minimum array length:', minCount, 'Minimum amount of items in array') : ''}
+      ${maxCount !== undefined ? this._arrayPropertyTemplate('Maximum array length:', maxCount, 'Maximum amount of items in array') : ''}
+    `
+  }
+
   /**
    * @return {TemplateResult} Templates for object properties
    */
@@ -688,15 +707,19 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
           : ''}
       `
     );
-    if (!this.hasParentType) {
-      return html`
+
+    return html`
+      ${!this.hasParentType ?
+        html`
         <span>Array of:</span>
         <div class="array-children">
           ${documents}
-        </div>
-      `;
-    }
-    return html`${documents}`;
+        </div>` 
+        : html`${documents}`
+        }
+    
+      ${this._arrayPropertiesTemplate()}
+    `;
   }
 
   /**

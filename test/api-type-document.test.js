@@ -521,6 +521,39 @@ describe('<api-type-document>', () => {
         });
       });
 
+      describe('Array type with restrictions', () => {
+        let element = /** @type ApiTypeDocument */ (null);
+        beforeEach(async () => {
+          const data = await AmfLoader.loadType('Emails', item[1], 'array-type');
+          element = await basicFixture();
+          element.amf = data[0];
+          element.type = data[1];
+          await aTimeout(0);
+        });
+
+        it('isArray is true', () => {
+          assert.isTrue(element.isArray);
+        });
+
+        it('Renders array document', () => {
+          const doc = element.shadowRoot.querySelector(
+            'property-shape-document.array-document'
+          );
+          assert.ok(doc);
+        });
+
+        it('Renders minItems and maxItems info', () => {
+          const properties = element.shadowRoot.querySelectorAll(
+            '.property-attribute'
+          );
+          assert.lengthOf(properties, 2);
+          assert.equal(properties[0].querySelector('.attribute-label').innerText, 'Minimum array length:');
+          assert.equal(properties[0].querySelector('.attribute-value').innerText, '1');
+          assert.equal(properties[1].querySelector('.attribute-label').innerText, 'Maximum array length:');
+          assert.equal(properties[1].querySelector('.attribute-value').innerText, '3');
+        });
+      });
+
       describe('Scalar type', () => {
         let element = /** @type ApiTypeDocument */ (null);
 
