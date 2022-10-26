@@ -1,0 +1,22 @@
+#%RAML 1.0
+
+title: W-11858334
+
+types:
+  testType:
+    properties:
+      country:
+        type: string
+        required: true
+        displayName: "Country"
+      skuList:
+        type: string[]
+        minItems: 3
+        maxItems: 10
+        required: true
+
+/test:
+ get:
+  body:
+   application/json:
+    type: testType

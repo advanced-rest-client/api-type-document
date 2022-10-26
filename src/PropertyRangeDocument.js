@@ -303,6 +303,25 @@ export class PropertyRangeDocument extends PropertyDocumentMixin(LitElement) {
     </div>`;
   }
 
+  _arrayPropertiesTemplate() {
+    const { range } = this;
+
+    return html` ${this._hasProperty(range, this.ns.w3.shacl.minCount)
+      ? this._listItemTemplate(
+        'Minimum array length',
+        'Minimum amount of items in array',
+        this.ns.w3.shacl.minCount
+      )
+      : ''}
+    ${this._hasProperty(range, this.ns.w3.shacl.maxCount)
+      ? this._listItemTemplate(
+        'Maximum array length',
+        'Maximum amount of items in array',
+        this.ns.w3.shacl.maxCount
+      )
+      : ''}`;
+  }
+
   /**
    * @return {TemplateResult|string} Template for the element.
    */
@@ -355,6 +374,7 @@ export class PropertyRangeDocument extends PropertyDocumentMixin(LitElement) {
         ? this._filePropertiesTemplate()
         : this._nonFilePropertiesTemplate()}
       ${this.isEnum ? this._enumTemplate() : ''}
+      ${this.isArray ? this._arrayPropertiesTemplate() : ''}
 
       <section class="examples" ?hidden="${!this._hasExamples}">
         <api-resource-example-document
