@@ -113,6 +113,7 @@ class ApiDemo extends ApiDemoPage {
       ['new-oas3-types', 'New OAS 3 types API'],
       ['APIC-483', 'APIC 483'],
       ['array-type', 'array-type'],
+      ['W-11858334', 'W-11858334'],
     ].map(
       ([file, label]) => html` <anypoint-item data-src="${file}-compact.json"
           >${label} - compact model</anypoint-item

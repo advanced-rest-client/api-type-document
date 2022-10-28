@@ -16,11 +16,11 @@ describe('PropertyRangeDocument', () => {
     return /** @type PropertyRangeDocument */ (elm);
   }
 
-  function findTypePropertyRange(element, type, index = 0) {
+  function findTypePropertyRange(element, type, index = 0, propIndex = 0) {
     type = element._resolve(type);
     const props = element._computeObjectProperties(type);
     const key = element._getAmfKey(element.ns.aml.vocabularies.shapes.range);
-    return element._ensureArray(props[0][key])[index];
+    return element._ensureArray(props[propIndex][key])[index];
   }
 
   async function getTypePropertyRange(
@@ -247,6 +247,58 @@ describe('PropertyRangeDocument', () => {
           )[2];
           const target = node.querySelector('.attribute-value');
           assert.equal(target.innerText.trim().toLowerCase(), '300');
+        });
+      });
+    });
+  });
+
+  describe('Array data rendering', () => {
+    [
+      ['Regular model', false],
+      ['Compact model', true],
+    ].forEach((item) => {
+      describe(String(item[0]), () => {
+        let element;
+        let amf;
+        let type;
+
+        before(async () => {
+          const data = await AmfLoader.loadType('testType', item[1], 'W-11858334');
+          amf = data[0];
+          type = data[1];
+        });
+
+        beforeEach(async () => {
+          element = await basicFixture();
+          element.amf = amf;
+          element.range = findTypePropertyRange(element, type, 0, 1);
+          await aTimeout(0);
+        });
+
+        it('Renders array minimum count', async () => {
+          const properties = element.shadowRoot.querySelectorAll('.property-attribute');
+          assert.lengthOf(properties, 2);
+
+          const minProperty = properties[0]
+          const label = minProperty.querySelector('.attribute-label');
+          assert.equal(label.innerText, 'Minimum array length:');
+
+          const value = minProperty.querySelector('.attribute-value');
+          assert.equal(value.title, 'Minimum amount of items in array');
+          assert.equal(value.innerText.trim().toLowerCase(), '3');
+        });
+
+        it('Renders array maximum count', async () => {
+          const properties = element.shadowRoot.querySelectorAll('.property-attribute');
+          assert.lengthOf(properties, 2);
+
+          const maxProperty = properties[1]
+          const label = maxProperty.querySelector('.attribute-label');
+          assert.equal(label.innerText, 'Maximum array length:');
+
+          const value = maxProperty.querySelector('.attribute-value');
+          assert.equal(value.title, 'Maximum amount of items in array');
+          assert.equal(value.innerText.trim().toLowerCase(), '10');
         });
       });
     });
