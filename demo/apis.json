@@ -21,5 +21,6 @@
   "oas-api/read-only-properties.yaml": { "type": "OAS 3.0", "mime": "application/yaml" },
   "APIC-649/APIC-649.yaml": { "type": "OAS 3.0", "mime": "application/yaml" },
   "APIC-671/APIC-671.yaml": { "type": "OAS 3.0", "mime": "application/yaml" },
-  "APIC-743/APIC-743.yaml": { "type": "OAS 3.0", "mime": "application/yaml" }
+  "APIC-743/APIC-743.yaml": { "type": "OAS 3.0", "mime": "application/yaml" },
+  "W-12142859/W-12142859.yaml": "OAS 2.0"
 }
