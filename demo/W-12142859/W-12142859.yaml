@@ -1,0 +1,49 @@
+swagger: "2.0"
+info:
+  description: "UPM Party Servicess"
+  version: 1.0.0
+  title: UPM Party Services
+paths:
+  /customers/preferences/search:
+    post:
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      responses:
+        "200":
+          description: "Get Address search response"
+          schema:
+            $ref: "#/definitions/preferencesSearchDTO"
+
+definitions:
+  preferencesSearchDTO:
+    type: object
+    properties:
+      Account:
+        type: "array"
+        items:
+          $ref: "#/definitions/PreferenceSearchAccount"
+  PreferenceSearchAccount:
+    type: object
+    allOf:
+      - $ref: "#/definitions/AccountBaseDTO"
+    properties:
+      Collateral:
+        type: "array"
+        items:
+          $ref: "#/definitions/CollateralDemographicsSearch"
+  AccountBaseDTO:
+    type: object
+    properties:
+      applicationId:
+        type: string
+        example: ""
+        description: "Application ID"
+  CollateralDemographicsSearch:
+    type: object
+    properties:
+      collateralId:
+        type: string
+        description: collateral id vin or hin or etc
+        example: "123"

@@ -416,7 +416,10 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       isObject = true;
       const andKey = this._getAmfKey(this.ns.w3.shacl.and);
       if (andKey in type) {
-        isObject = false;
+        const propertyKey = this._getAmfKey(this.ns.w3.shacl.property);
+        if (!(propertyKey in type)) {
+          isObject = false;
+        }
         isAnd = true;
         this.andTypes = this._computeAndTypes(type[andKey]);
       }

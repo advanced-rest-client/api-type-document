@@ -5,6 +5,7 @@ import '../api-type-document.js';
 
 /** @typedef {import('..').ApiTypeDocument} ApiTypeDocument */
 /** @typedef {import('..').PropertyShapeDocument} PropertyShapeDocument */
+/** @typedef {import('@api-components/amf-helper-mixin').AmfDocument} AmfDocument */
 
 describe('<api-type-document>', () => {
   const newOas3Types = 'new-oas3-types';
@@ -1020,6 +1021,35 @@ describe('<api-type-document>', () => {
         assert.exists(
           element.shadowRoot.querySelector('property-shape-document')
         );
+      });
+    });
+  });
+
+  [
+    ['Regular model - Combining "and" with "properties"', false],
+    ['Compact model - Combining "and" with "properties"', true],
+  ].forEach(([name, compact]) => {
+    describe(String(name), () => {
+      let element = /** @type ApiTypeDocument */ (null);
+      let amf;
+      let type;
+
+      beforeEach(async () => {
+        element = await basicFixture();
+        [amf, type] = await AmfLoader.loadType('PreferenceSearchAccount', compact, 'W-12142859');
+        element.amf = amf;
+        element.type = type;
+
+        await nextFrame();
+        await aTimeout(0);
+      });
+
+      it('renders "and" property', () => {
+        assert.exists(element.shadowRoot.querySelector('.and-document'));
+      });
+
+      it('renders "properties" property', () => {
+        assert.exists(element.shadowRoot.querySelector('.object-document'));
       });
     });
   });
