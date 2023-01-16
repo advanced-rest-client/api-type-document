@@ -1,0 +1,29 @@
+{
+  "title": "pet",
+  "description": "pet",
+  "examples": [
+    {
+      "animal": "pet"
+    }
+  ],
+  "type": "object",
+  "properties": {
+    "pet": {
+      "type": "string",
+      "oneOf": [
+        {
+          "const": "CT",
+          "description": "Cat"
+        },
+        {
+          "const": "DG",
+          "description": "Dog"
+        },
+        {
+          "const": "PT",
+          "description": "Parrot"
+        } 
+      ]
+    }
+  }
+}

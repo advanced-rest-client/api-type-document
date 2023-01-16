@@ -383,6 +383,12 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       this._hasType(type, this.ns.aml.vocabularies.shapes.NilShape)
     ) {
       isScalar = true;
+      if (this._hasProperty(type, this.ns.w3.shacl.xone)) {
+        isScalar = false;
+        isOneOf = true;
+        key = this._getAmfKey(this.ns.w3.shacl.xone);
+        this.oneOfTypes = this._computeTypes(type, key);
+      }
     } else if (
       this._hasType(type, this.ns.aml.vocabularies.shapes.UnionShape)
     ) {
