@@ -1,7 +1,7 @@
 {
   "name": "@api-components/api-type-document",
   "description": "A documentation table for type (resource) properties. Works with AMF data model",
-  "version": "4.2.22",
+  "version": "4.2.23",
   "license": "Apache-2.0",
   "main": "index.js",
   "module": "index.js",
@@ -45,7 +45,7 @@
     "@open-wc/testing": "^2.5.15",
     "@web/dev-server": "^0.1.24",
     "@web/test-runner": "^0.13.18",
-    "@web/test-runner-playwright": "^0.8.8",
+    "@web/test-runner-playwright": "0.8.10",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.1.0",
     "husky": "^7.0.2",

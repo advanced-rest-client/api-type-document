@@ -1,0 +1,23 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema",
+	"description": "Represents data from MPTH70 Value Added Service Mapping For SAP ERP",
+	"type": "object",
+	"properties": {
+		"seasVasLocation": {
+			"type": "string",
+			"description": "VAS Location in case of SEAS where this Value added service will be executed. @since 2023.1",
+			"see" : "https://canda-services.atlassian.net/browse/CARA-75",
+			"anyOf" : [
+                {
+                    "type": "string",
+                    "enum": [ "SEAS", "DC" ]
+                },
+                {
+                    "type": "string",
+                    "description" : "accept any unknown value to be extendable",
+                    "see" : "https://canda-services.atlassian.net/wiki/spaces/IETKB/pages/1390149835/Web+API+Guideline#Versioning"
+                }
+            ]
+		}
+	}
+}
