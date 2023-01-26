@@ -16,6 +16,7 @@
   "array-type/array-type.raml": "RAML 1.0",
   "W-11858334/W-11858334.raml": "RAML 1.0",
   "W-12137562/W-12137562.raml": "RAML 1.0",
+  "W-12428173/W-12428173.raml": "RAML 1.0",
   "APIC-429/APIC-429.yaml": { "type": "OAS 3.0", "mime": "application/yaml" },
   "SE-17897/SE-17897.yaml": { "type": "OAS 3.0", "mime": "application/yaml" },
   "new-oas3-types/new-oas3-types.yaml": { "type": "OAS 3.0", "mime": "application/yaml" },
