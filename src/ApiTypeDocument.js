@@ -389,6 +389,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
         key = this._getAmfKey(this.ns.w3.shacl.xone);
         this.oneOfTypes = this._computeTypes(type, key);
       } else if (this._hasProperty(type, this.ns.w3.shacl.or)) {
+        isScalar = false;
         isAnyOf = true;
         key = this._getAmfKey(this.ns.w3.shacl.or);
         this.anyOfTypes = this._computeTypes(type, key);
