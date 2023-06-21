@@ -411,7 +411,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
       ));
     }
     const data = this._getValue(shape, this.ns.w3.shacl.minCount);
-    return data !== undefined && data !== 0;
+    return data !== undefined && Number(data) !== 0;
   }
 
   /**
