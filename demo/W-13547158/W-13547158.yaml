@@ -1,0 +1,57 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: OAS anyOf minimal test
+paths:
+  /fhir/nhi/v1/Patient:
+    description: Minimal test of a FHIR OAS Extension
+    get:
+      summary: Search all resources of type Patient based on a set of criteria
+      operationId: searchPatient
+      responses:
+        '200':
+          description: the resource being returned
+          content:
+            application/fhir+json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+components:
+  schemas:
+    Patient:
+      type: object
+      description: The Patient resource exposed by the NHI.
+      properties:
+        extension-anyOf:
+          type: array
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/Extension1'
+              - $ref: '#/components/schemas/Extension2'
+              - $ref: '#/components/schemas/Extension3'
+    Extension1:
+      type: object
+      description: Extension 1
+      properties:
+        ext1-item-1:
+          type: string
+        ext1-item-2:
+          type: string
+
+    Extension2:
+      type: object
+      description: Extension 1
+      properties:
+        ext2-item-1:
+          type: string
+        ext2-item-2:
+          type: string
+
+    Extension3:
+      type: object
+      description: Extension 1
+      properties:
+        ext3-item-1:
+          type: string
+        ext3-item-2:
+          type: string
+

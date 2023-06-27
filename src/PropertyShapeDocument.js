@@ -295,8 +295,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
       this.propertyName
     );
     this.propertyDataType = this._computeObjectDataType(range, shape);
-    const isDeprecated = Boolean(this._computeIsDeprecated(range));
-    this.deprecated = isDeprecated;
+    this.deprecated = Boolean(this._computeIsDeprecated(range));
   }
 
   _computeIsDeprecated(range) {
