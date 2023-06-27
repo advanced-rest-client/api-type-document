@@ -9,6 +9,7 @@ import '../api-type-document.js';
 
 describe('<api-type-document>', () => {
   const newOas3Types = 'new-oas3-types';
+  const oas3AnyOf = 'W-13547158';
 
   /**
    * @returns {Promise<ApiTypeDocument>}
@@ -994,6 +995,71 @@ describe('<api-type-document>', () => {
         assert.equal(element.selectedAnyOf, 0);
         /** @type HTMLElement */ (element.shadowRoot.querySelectorAll('.any-of-toggle')[1]).click();
         assert.equal(element.selectedAnyOf, 1);
+      });
+    });
+  });
+
+  [
+    ['Regular model - OAS 3 any of types', false],
+    ['Compact model - OAS 3 any of types', true],
+  ].forEach(([name, compact]) => {
+    describe(String(name), () => {
+      let element = /** @type ApiTypeDocument */ (null);
+
+      beforeEach(async () => {
+        element = await basicFixture();
+      });
+
+      it('should be an object type', async () => {
+        const [amf, type] = await AmfLoader.loadType(
+          'Patient',
+          compact,
+          oas3AnyOf
+        );
+        element.amf = amf;
+        element.type = type;
+        await aTimeout(0);
+        assert.equal(element.isObject, true);
+      });
+
+      it('should have anyOf properties', async () => {
+        const [amf, type] = await AmfLoader.loadType(
+          'Patient',
+          compact,
+          oas3AnyOf
+        );
+        element.amf = amf;
+        element.type = type;
+        await aTimeout(0);
+
+        const showButton = element.shadowRoot.querySelector('property-shape-document').shadowRoot.querySelector('anypoint-button.complex-toggle');
+        showButton.click();
+        await aTimeout(0);
+        await aTimeout(0);
+
+        const childrenType = element.shadowRoot.querySelector('property-shape-document').shadowRoot.querySelector('api-type-document');
+        assert.equal(childrenType.isAnyOf, true);
+      });
+
+      it('should list all anyOf options', async () => {
+        const [amf, type] = await AmfLoader.loadType(
+          'Patient',
+          compact,
+          oas3AnyOf
+        );
+        element.amf = amf;
+        element.type = type;
+        await aTimeout(0);
+
+        const showButton = element.shadowRoot.querySelector('property-shape-document').shadowRoot.querySelector('anypoint-button.complex-toggle');
+        showButton.click();
+        await aTimeout(0);
+        await aTimeout(0);
+
+        const childrenType = element.shadowRoot.querySelector('property-shape-document').shadowRoot.querySelector('api-type-document');
+        const unionTypes = childrenType.shadowRoot.querySelector('.union-type-selector');
+        const anyOfOptions = unionTypes.querySelectorAll('.any-of-toggle');
+        assert.equal(anyOfOptions.length, 3);
       });
     });
   });

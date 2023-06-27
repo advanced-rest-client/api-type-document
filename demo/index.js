@@ -116,6 +116,7 @@ class ApiDemo extends ApiDemoPage {
       ['W-11858334', 'W-11858334'],
       ['W-12137562', 'W-12137562'],
       ['W-12428173', 'W-12428173'],
+      ['W-13547158', 'W-13547158'],
     ].map(
       ([file, label]) => html` <anypoint-item data-src="${file}-compact.json"
           >${label} - compact model</anypoint-item

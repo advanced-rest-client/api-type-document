@@ -376,12 +376,10 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     let isOneOf = false;
     let isAnyOf = false;
     let key = ''
+    const shapesKey = this.ns.aml.vocabularies.shapes
     if (type instanceof Array) {
       isObject = true;
-    } else if (
-      this._hasType(type, this.ns.aml.vocabularies.shapes.ScalarShape) ||
-      this._hasType(type, this.ns.aml.vocabularies.shapes.NilShape)
-    ) {
+    } else if (this._hasType(type, shapesKey.ScalarShape) || this._hasType(type, shapesKey.NilShape)) {
       isScalar = true;
       if (this._hasProperty(type, this.ns.w3.shacl.xone)) {
         isScalar = false;
@@ -395,10 +393,10 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
         this.anyOfTypes = this._computeTypes(type, key);
       }
     } else if (
-      this._hasType(type, this.ns.aml.vocabularies.shapes.UnionShape)
+      this._hasType(type, shapesKey.UnionShape)
     ) {
       isUnion = true;
-      key = this._getAmfKey(this.ns.aml.vocabularies.shapes.anyOf);
+      key = this._getAmfKey(shapesKey.anyOf);
       this.unionTypes = this._computeTypes(type, key);
     } else if (this._hasProperty(type, this.ns.w3.shacl.xone)) {
       isOneOf = true;
@@ -409,18 +407,23 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       key = this._getAmfKey(this.ns.w3.shacl.or);
       this.anyOfTypes = this._computeTypes(type, key);
     } else if (
-      this._hasType(type, this.ns.aml.vocabularies.shapes.ArrayShape)
+      this._hasType(type, shapesKey.ArrayShape)
     ) {
       isArray = true;
-      const iKey = this._getAmfKey(this.ns.aml.vocabularies.shapes.items);
+      const iKey = this._getAmfKey(shapesKey.items);
       let items = this._ensureArray(type[iKey]);
       if (items) {
         items = items[0];
         const andKey = this._getAmfKey(this.ns.w3.shacl.and);
+        const orKey = this._getAmfKey(this.ns.w3.shacl.or);
         if (andKey in items) {
           isArray = false;
           isAnd = true;
           this.andTypes = this._computeAndTypes(items[andKey]);
+        } else if (orKey in items) {
+          isArray = false;
+          isAnyOf = true;
+          this.anyOfTypes = this._computeAndTypes(items[orKey]);
         }
       }
     } else if (this._hasType(type, this.ns.w3.shacl.NodeShape)) {
@@ -434,7 +437,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
         isAnd = true;
         this.andTypes = this._computeAndTypes(type[andKey]);
       }
-    } else if (this._hasType(type, this.ns.aml.vocabularies.shapes.AnyShape)) {
+    } else if (this._hasType(type, shapesKey.AnyShape)) {
       const andKey = this._getAmfKey(this.ns.w3.shacl.and);
       if (andKey in type) {
         isAnd = true;
@@ -782,7 +785,14 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     const selected = this.selectedAnyOf;
     const selectTypeCallback = this._selectType.bind(this, 'selectedAnyOf');
     const key = this._getAmfKey(this.ns.w3.shacl.or);
-    const type = this._computeProperty(this._resolvedType, key, selected);
+    let type = this._computeProperty(this._resolvedType, key, selected);
+    if (!type) {
+      const itemsKey = this._getAmfKey(this.ns.aml.vocabularies.shapes.items);
+      const items = this._ensureArray(this._resolvedType[itemsKey]);
+      if (items.length > 0) {
+        type = this._computeProperty(items[0], key, selected);
+      }
+    }
     return this._multiTypeTemplate({ label, items, typeName, selected, selectTypeCallback, type });
   }
 
