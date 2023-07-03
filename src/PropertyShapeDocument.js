@@ -404,7 +404,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     }
     shape = this._resolve(shape);
     if (this._hasType(shape, this.ns.aml.vocabularies.apiContract.Parameter)) {
-      return /** @type boolean */ (this._getValue(
+      return /** @type boolean */ Boolean(this._getValue(
         shape,
         this.ns.aml.vocabularies.apiContract.required
       ));
