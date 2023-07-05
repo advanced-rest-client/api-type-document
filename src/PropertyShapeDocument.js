@@ -390,6 +390,13 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     return !!parentTypeName;
   }
 
+  _toBoolean(value) {
+    if (typeof value === 'boolean') {
+      return value
+    }
+    return value === 'true'
+  }
+
   /**
    * Computes value for `isRequired` property.
    * In AMF model a property is required when `http://www.w3.org/ns/shacl#minCount`
@@ -404,10 +411,11 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     }
     shape = this._resolve(shape);
     if (this._hasType(shape, this.ns.aml.vocabularies.apiContract.Parameter)) {
-      return /** @type boolean */ Boolean(this._getValue(
+      const required = Boolean(this._getValue(
         shape,
         this.ns.aml.vocabularies.apiContract.required
-      ));
+      ))
+      return this._toBoolean(required);
     }
     const data = this._getValue(shape, this.ns.w3.shacl.minCount);
     return data !== undefined && Number(data) !== 0;
