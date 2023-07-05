@@ -411,10 +411,10 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     }
     shape = this._resolve(shape);
     if (this._hasType(shape, this.ns.aml.vocabularies.apiContract.Parameter)) {
-      const required = Boolean(this._getValue(
+      const required = this._getValue(
         shape,
         this.ns.aml.vocabularies.apiContract.required
-      ))
+      )
       return this._toBoolean(required);
     }
     const data = this._getValue(shape, this.ns.w3.shacl.minCount);
