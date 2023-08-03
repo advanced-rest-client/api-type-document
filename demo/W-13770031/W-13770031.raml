@@ -1,0 +1,11 @@
+#%RAML 1.0
+title: avnz_work
+
+resourceTypes:
+  kamino1: !include /ResourceTypes/Kamino1.raml
+
+uses:
+  kaminoLib: /DataTypes/Kamino-library.raml
+
+/kamino/1:
+  type: kamino1

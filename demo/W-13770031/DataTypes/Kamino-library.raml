@@ -1,0 +1,20 @@
+#%RAML 1.0 Library
+usage:
+types:
+  1-post:
+    properties:
+      parent1:
+        description: 親要素にmaxItemsの指定あり
+        type: array
+        maxItems: 2
+
+        items:
+          properties:
+            child:
+              type: string
+            child2:
+              type: string[]
+              example:
+                - A
+                - B
+                - C
