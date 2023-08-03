@@ -174,6 +174,8 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
    */
   noMediaSelector: boolean;
 
+  noArrayInfo: boolean;
+
   get shouldRenderMediaSelector(): boolean;
 
   constructor();
