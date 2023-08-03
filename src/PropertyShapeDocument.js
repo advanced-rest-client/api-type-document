@@ -582,6 +582,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
       ?compatibility="${this.compatibility}"
       ?noExamplesActions="${this.noExamplesActions}"
       noMainExample
+      noArrayInfo
       .mediaType="${this.mediaType}"
       ?graph="${this.graph}"
     ></api-type-document>`;
