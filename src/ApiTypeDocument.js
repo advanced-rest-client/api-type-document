@@ -167,6 +167,8 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
        * applicable.
        */
       noMediaSelector: { type: Boolean },
+
+      noArrayInfo: { type: Boolean },
     };
   }
 
@@ -685,13 +687,16 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
   }
 
   _arrayPropertiesTemplate() {
-    const minCount = this._getValue(this._resolvedType, this.ns.w3.shacl.minCount)
-    const maxCount = this._getValue(this._resolvedType, this.ns.w3.shacl.maxCount)
+    if (!this.noArrayInfo) {
+      const minCount = this._getValue(this._resolvedType, this.ns.w3.shacl.minCount)
+      const maxCount = this._getValue(this._resolvedType, this.ns.w3.shacl.maxCount)
 
-    return html`
-      ${minCount !== undefined ? this._arrayPropertyTemplate('Minimum array length:', minCount, 'Minimum amount of items in array') : ''}
-      ${maxCount !== undefined ? this._arrayPropertyTemplate('Maximum array length:', maxCount, 'Maximum amount of items in array') : ''}
-    `
+      return html`
+          ${minCount !== undefined ? this._arrayPropertyTemplate('Minimum array length:', minCount, 'Minimum amount of items in array') : ''}
+          ${maxCount !== undefined ? this._arrayPropertyTemplate('Maximum array length:', maxCount, 'Maximum amount of items in array') : ''}
+      `
+    }
+    return html``
   }
 
   /**
