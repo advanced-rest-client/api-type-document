@@ -570,8 +570,10 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       return this._filterReadOnlyProperties(itemProperties)
     }
 
+    const additionalPropertiesSchema = this._ensureArray(item[additionalPropertiesKey])
+
     // If the item does have additional properties, ensure they are in an array
-    const additionalProperties = this._ensureArray(item[additionalPropertiesKey][0][propertyKey])
+    const additionalProperties = this._ensureArray(additionalPropertiesSchema[0][propertyKey])
 
     // Combine the item's properties and additional properties
     const combinedProperties = [...itemProperties, ...additionalProperties]
