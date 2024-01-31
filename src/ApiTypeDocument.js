@@ -560,15 +560,24 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     if (Array.isArray(item)) {
       return item;
     }
+
     const propertyKey = this._getAmfKey(this.ns.w3.shacl.property);
-    const properties = this._ensureArray(item[propertyKey])
-    const additionalPropertieKey = this._getAmfKey(this.ns.w3.shacl.additionalPropertiesSchema);
-    if (!item[additionalPropertieKey]) {
-      return properties
+    const itemProperties = this._ensureArray(item[propertyKey])
+    const additionalPropertiesKey = this._getAmfKey(this.ns.w3.shacl.additionalPropertiesSchema);
+
+    // If the item doesn't have additional properties, filter the read-only properties and return
+    if (!item[additionalPropertiesKey]) {
+      return this._filterReadOnlyProperties(itemProperties)
     }
-    const additionalProperties = this._ensureArray(item[additionalPropertieKey][0][propertyKey])
-    const result = [...properties, ...additionalProperties]
-    return result
+
+    // If the item does have additional properties, ensure they are in an array
+    const additionalProperties = this._ensureArray(item[additionalPropertiesKey][0][propertyKey])
+
+    // Combine the item's properties and additional properties
+    const combinedProperties = [...itemProperties, ...additionalProperties]
+
+    // Filter the read-only properties and return
+    return this._filterReadOnlyProperties(combinedProperties);
   }
 
   /**
