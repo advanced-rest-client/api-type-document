@@ -560,8 +560,15 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     if (Array.isArray(item)) {
       return item;
     }
-    const key = this._getAmfKey(this.ns.w3.shacl.property);
-    return this._filterReadOnlyProperties(this._ensureArray(item[key]));
+    const propertyKey = this._getAmfKey(this.ns.w3.shacl.property);
+    const properties = this._ensureArray(item[propertyKey])
+    const additionalPropertieKey = this._getAmfKey(this.ns.w3.shacl.additionalPropertiesSchema);
+    if (!item[additionalPropertieKey]) {
+      return properties
+    }
+    const additionalProperties = this._ensureArray(item[additionalPropertieKey][0][propertyKey])
+    const result = [...properties, ...additionalProperties]
+    return result
   }
 
   /**
@@ -702,7 +709,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
   /**
    * @return {TemplateResult} Templates for object properties
    */
-   _arrayTemplate() {
+  _arrayTemplate() {
     const items = this._computeArrayProperties(this._resolvedType) || [];
     const documents = items.map(
       (item) => html`
@@ -742,9 +749,9 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
         <span>Array of:</span>
         <div class="array-children">
           ${documents}
-        </div>` 
+        </div>`
         : html`${documents}`
-        }
+      }
     
       ${this._arrayPropertiesTemplate()}
     `;
@@ -758,7 +765,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     const selected = this.selectedUnion;
     const selectTypeCallback = this._selectType.bind(this, 'selectedUnion');
     const key = this._getAmfKey(this.ns.aml.vocabularies.shapes.anyOf);
-    const type = this._computeProperty(this._resolvedType, key,selected);
+    const type = this._computeProperty(this._resolvedType, key, selected);
     const typeName = 'union'
     const label = 'Any of'
     return this._multiTypeTemplate({ label, items, typeName, selected, selectTypeCallback, type });
@@ -855,10 +862,10 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     }
     return html` ${items.map(
       (item) => html` ${item.label
-          ? html`<p class="inheritance-label">
+        ? html`<p class="inheritance-label">
               Properties inherited from <b>${item.label}</b>.
             </p>`
-          : html`<p class="inheritance-label">Properties defined inline.</p>`}
+        : html`<p class="inheritance-label">Properties defined inline.</p>`}
         <api-type-document
           class="and-document"
           .amf="${this.amf}"
@@ -887,12 +894,12 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     return html`<style>${this.styles}</style>
       <section class="examples" ?hidden="${!this._renderMainExample}">
         ${this.shouldRenderMediaSelector
-          ? html`<div class="media-type-selector">
+        ? html`<div class="media-type-selector">
               <span>Media type:</span>
               ${mediaTypes.map((item, index) => {
-                const selected = this.selectedMediaType === index;
-                const pressed = selected ? 'true' : 'false';
-                return html`<anypoint-button
+          const selected = this.selectedMediaType === index;
+          const pressed = selected ? 'true' : 'false';
+          return html`<anypoint-button
                   part="content-action-button"
                   class="media-toggle"
                   data-index="${index}"
@@ -903,9 +910,9 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
                   title="Select ${item} media type"
                   >${item}</anypoint-button
                 >`;
-              })}
+        })}
             </div>`
-          : ''}
+        : ''}
 
         <api-resource-example-document
           .amf="${this.amf}"
