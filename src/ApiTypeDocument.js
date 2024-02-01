@@ -560,8 +560,26 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     if (Array.isArray(item)) {
       return item;
     }
-    const key = this._getAmfKey(this.ns.w3.shacl.property);
-    return this._filterReadOnlyProperties(this._ensureArray(item[key]));
+
+    const propertyKey = this._getAmfKey(this.ns.w3.shacl.property);
+    const itemProperties = this._ensureArray(item[propertyKey])
+    const additionalPropertiesKey = this._getAmfKey(this.ns.w3.shacl.additionalPropertiesSchema);
+
+    // If the item doesn't have additional properties, filter the read-only properties and return
+    if (!item[additionalPropertiesKey]) {
+      return this._filterReadOnlyProperties(itemProperties)
+    }
+
+    const additionalPropertiesSchema = this._ensureArray(item[additionalPropertiesKey])
+
+    // If the item does have additional properties, ensure they are in an array
+    const additionalProperties = this._ensureArray(additionalPropertiesSchema[0][propertyKey])
+
+    // Combine the item's properties and additional properties
+    const combinedProperties = [...itemProperties, ...additionalProperties]
+
+    // Filter the read-only properties and return
+    return this._filterReadOnlyProperties(combinedProperties);
   }
 
   /**
@@ -702,7 +720,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
   /**
    * @return {TemplateResult} Templates for object properties
    */
-   _arrayTemplate() {
+  _arrayTemplate() {
     const items = this._computeArrayProperties(this._resolvedType) || [];
     const documents = items.map(
       (item) => html`
@@ -742,9 +760,9 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
         <span>Array of:</span>
         <div class="array-children">
           ${documents}
-        </div>` 
+        </div>`
         : html`${documents}`
-        }
+      }
     
       ${this._arrayPropertiesTemplate()}
     `;
@@ -758,7 +776,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     const selected = this.selectedUnion;
     const selectTypeCallback = this._selectType.bind(this, 'selectedUnion');
     const key = this._getAmfKey(this.ns.aml.vocabularies.shapes.anyOf);
-    const type = this._computeProperty(this._resolvedType, key,selected);
+    const type = this._computeProperty(this._resolvedType, key, selected);
     const typeName = 'union'
     const label = 'Any of'
     return this._multiTypeTemplate({ label, items, typeName, selected, selectTypeCallback, type });
@@ -855,10 +873,10 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     }
     return html` ${items.map(
       (item) => html` ${item.label
-          ? html`<p class="inheritance-label">
+        ? html`<p class="inheritance-label">
               Properties inherited from <b>${item.label}</b>.
             </p>`
-          : html`<p class="inheritance-label">Properties defined inline.</p>`}
+        : html`<p class="inheritance-label">Properties defined inline.</p>`}
         <api-type-document
           class="and-document"
           .amf="${this.amf}"
@@ -887,12 +905,12 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     return html`<style>${this.styles}</style>
       <section class="examples" ?hidden="${!this._renderMainExample}">
         ${this.shouldRenderMediaSelector
-          ? html`<div class="media-type-selector">
+        ? html`<div class="media-type-selector">
               <span>Media type:</span>
               ${mediaTypes.map((item, index) => {
-                const selected = this.selectedMediaType === index;
-                const pressed = selected ? 'true' : 'false';
-                return html`<anypoint-button
+          const selected = this.selectedMediaType === index;
+          const pressed = selected ? 'true' : 'false';
+          return html`<anypoint-button
                   part="content-action-button"
                   class="media-toggle"
                   data-index="${index}"
@@ -903,9 +921,9 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
                   title="Select ${item} media type"
                   >${item}</anypoint-button
                 >`;
-              })}
+        })}
             </div>`
-          : ''}
+        : ''}
 
         <api-resource-example-document
           .amf="${this.amf}"
