@@ -172,6 +172,7 @@ const mxFunction = (base) => {
           return 'String';
         case this._getAmfKey(sc.integer):
         case sc.integer:
+        case sc.int:
           return 'Integer';
         case this._getAmfKey(sc.long):
         case sc.long:
@@ -205,6 +206,10 @@ const mxFunction = (base) => {
         case this._getAmfKey(rs.password):
         case rs.password:
           return 'Password';
+        case sc.bytes:
+          return 'Bytes'
+        case sc.fixed:
+          return 'Fixed'
         default:
           return 'Unknown type';
       }

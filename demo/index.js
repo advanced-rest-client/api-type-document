@@ -28,7 +28,7 @@ class ApiDemo extends ApiDemoPage {
 
   _navChanged(e) {
     const { selected, type } = e.detail;
-    this.hasType = false;
+   this.hasType = false;
     this.mediaType = undefined;
     this.mediaTypes = undefined;
 
@@ -40,7 +40,7 @@ class ApiDemo extends ApiDemoPage {
   }
 
   setBodyData(id) {
-    const webApi = this._computeWebApi(this.amf);
+    const webApi = this._computeWebApi(this.amf) || this._computeApi(this.amf);
     const method = this._computeMethodModel(webApi, id);
     const expects = this._computeExpects(method);
     const payload = expects ? this._computePayload(expects)[0] : {};
@@ -100,6 +100,9 @@ class ApiDemo extends ApiDemoPage {
   _apiListTemplate() {
     return [
       ['demo-api', 'Demo API'],
+      ['avro', 'avro'],
+      ['avro2', 'avro2'],
+      ['jldAsync26', 'jldAsync26'],
       ['APIC-649', 'Deprecated properties'],
       ['APIC-429', 'APIC 429'],
       ['read-only-properties', 'Read Only Properties API'],

@@ -134,6 +134,10 @@ export default css`
     font-weight: var(--api-type-document-trait-data-type-font-weight, normal);
   }
 
+  .property-traits > span.fixed-type-size {
+    padding: var(--api-type-document-trait-fixed-type-size-padding, 2px 1px);
+  }
+
   arc-marked {
     background-color: transparent;
     padding: 0;

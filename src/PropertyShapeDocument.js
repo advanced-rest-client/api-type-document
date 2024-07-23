@@ -35,6 +35,31 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
        */
       propertyName: { type: String },
       /**
+       * A type size.
+       * Is only used for async / avro api
+       */
+      size: { type: String },
+      /**
+       * A type defaultValue.
+       * Is only used for async / avro api
+       */
+      defaultValue: { type: String },
+      /**
+       * A type namespace.
+       * Is only used for async / avro api
+       */
+      namespace: { type: String },
+      /**
+       * A type aliases.
+       * Is only used for async / avro api
+       */
+      aliases: { type: Array },
+      /**
+       * Avro original value type.
+       * Is only used for async / avro api
+       */
+      avroValue: { type: String },
+      /**
        * Computed value, true if `displayName` has been defined for this
        * property.
        */
@@ -211,6 +236,11 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
 
   constructor() {
     super();
+    this.avroValue = undefined
+    this.defaultValue = undefined
+    this.size = undefined
+    this.namespace = undefined
+    this.aliases = undefined
     this.hasDisplayName = false;
     this.hasParentTypeName = false;
     this.hasPropertyDescription = false;
@@ -290,6 +320,14 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
   _shapeRangeChanged(shape, range) {
     this.displayName = this._computeDisplayName(range, shape);
     this.propertyName = this._computePropertyName(range, shape);
+    this.avroValue = this._computeAvroShapeRangeSourceMap(range, shape)
+    const {size,namespace,aliases, defaultValue} = this._computeAvroProperties(range, shape)
+    this.size = size
+    this.namespace = namespace
+    this.aliases = aliases
+    this.defaultValue = defaultValue
+    
+    
     this.hasDisplayName = this._computeHasDisplayName(
       this.displayName,
       this.propertyName
@@ -368,6 +406,119 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     }
     return undefined;
   }
+
+  /**
+   * Computes avro property. Only for async / avro
+   *
+   * @param {Object} range Range object of current shape.
+   * @param {Object} shape The shape object
+   * @return {String|undefined} Size of the property
+   */
+  _computeAvroProperty(range, shape, prop) {
+    if (!shape && !range) {
+      return undefined;
+    }
+    let result
+    if (shape) {
+      shape = this._resolve(shape);
+      result = /** @type string */ (this._getValue(
+        shape,
+        this.ns.aml.vocabularies.shapes[prop]
+      ));
+
+    }
+    if (range && !result) {
+      range = this._resolve(range);
+      result = this._getValue(range, this.ns.aml.vocabularies.shapes[prop]);
+    }
+    return result ? String(result): undefined;
+  }
+
+  /**
+   * Computes avro defaultValue. Only for async / avro
+   *
+   * @param {Object} range Range object of current shape.
+   * @param {Object} shape The shape object
+   * @return {String|undefined} Size of the property
+   */
+  _computeAvroDefaultValue(range, shape) {
+    if (!shape && !range) {
+      return undefined;
+    }
+    const defaultValueKey = this.ns.w3.shacl.defaultValue
+    let result
+    if (shape) {
+      shape = this._resolve(shape);
+      if(shape[defaultValueKey]){
+        result = this._getValue(shape[defaultValueKey][0], this.ns.aml.vocabularies.data.value)
+      }
+    }
+    if (range && !result) {
+      range = this._resolve(range);
+      if(range[defaultValueKey]){
+        result = this._getValue(range[defaultValueKey], this.ns.aml.vocabularies.data.value)
+      }
+    }
+    return result ? String(result): undefined;
+  }
+
+  /**
+   * Computes size of the property. Only for async / avro
+   *
+   * @param {Object} range Range object of current shape.
+   * @param {Object} shape The shape object
+   * @return {Object|undefined} Size,namespace,aliases,defaultValue of the property (only when has avroValues)
+   */
+  _computeAvroProperties(range, shape) {
+    if(!this.avroValue){
+      return {size:undefined, namespace:undefined, aliases:undefined, defaultValue:undefined}
+    }
+   const size = this._computeAvroProperty(range,shape,"size")
+   const namespace = this._computeAvroProperty(range,shape,"namespace")
+   const aliases = this._computeAvroProperty(range,shape,"aliases")
+   const defaultValue = this._computeAvroDefaultValue(range,shape)
+   return {size, namespace, aliases, defaultValue}
+  }
+
+  /**
+   * Computes source values of the property. Only for async / avro
+   *
+   * @param {Object} data Range object of current shape.
+   */
+  _computeAvroSourceMap(data) {
+    try{
+      const sourcesKey = this._getAmfKey(this.ns.aml.vocabularies.docSourceMaps.sources)
+      const avroSchemaKey = this._getAmfKey(this.ns.aml.vocabularies.docSourceMaps.avroSchema)
+      const valueKey = this._getAmfKey(this.ns.aml.vocabularies.docSourceMaps.value)
+      if(data[sourcesKey] && data[sourcesKey][0][avroSchemaKey]){
+         const avroValues = this._ensureArray(data[sourcesKey][0][avroSchemaKey])
+         return avroValues[0][valueKey][0]['@value']
+      }
+      return undefined
+    }catch(_){
+      return undefined
+    }
+   
+  }
+
+  /**
+   * Computes source values of the property. Only for async / avro
+   *
+   * @param {Object} range Range object of current shape.
+   * @param {Object} shape The shape object
+   * @return {Object} Size of the property
+   */
+  _computeAvroShapeRangeSourceMap(range,shape) {
+   const shapeValue = this._computeAvroSourceMap(shape)
+   if(shapeValue){
+    return shapeValue
+   }
+   return this._computeAvroSourceMap(range)
+  }
+
+
+
+  
 
   /**
    * Computes value for `hasDisplayName` property.
@@ -613,8 +764,63 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
       const itemType = this.arrayScalarTypeName;
       dataType = `${dataType} of ${itemType}`;
     }
-    return html`<span class="data-type">${dataType}</span>`;
+    return html`
+      <span class="data-type">${dataType}</span>`;
+
   }
+
+  /**
+   * @return {TemplateResult | String} Template size value (only for async / avro)
+   */
+  _getFixedTypeSizeAvroTemplate() {
+    const { size } = this;
+    if(!size){
+      return ''
+    }
+    return html`
+      <div class="fixed-type-size"><span>Size: ${size}</span></div>`;
+  }
+
+  /**
+   * @return {TemplateResult | String} Template size value (only for async / avro)
+   */
+  _getDefaultValueAvroTemplate() {
+    const { defaultValue } = this;
+    if(!defaultValue){
+      return ''
+    }
+    return html`
+      <div class="fixed-type-size"><span>Default Value: ${defaultValue}</span></div>`;
+  }
+
+  /**
+   * @return {TemplateResult | String} Template namespace value (only for async / avro)
+   */
+  _getTypeNamespaceAvroTemplate() {
+    const { namespace } = this;
+    if(!namespace){
+      return ''
+    }
+    return html`
+      <div class="fixed-type-size"><span>Namespace: ${namespace}</span></div>`;
+  }
+
+  /**
+   * @return {TemplateResult | String} Template namespace value (only for async / avro)
+   */
+  _getTypeAliasesAvroTemplate() {
+  const { aliases } = this;
+  if (!aliases) {
+    return '';
+  }
+  return html`
+    <div class="fixed-type-size">
+      Aliases: ${aliases.map(alias => html`<span>${alias}</span>`)}
+    </div>
+  `;
+}
+
+  
 
   /**
    * @return {TemplateResult|string} Template for the description
@@ -716,6 +922,10 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
             >`
           : ''}
       </div>
+      ${this._getDefaultValueAvroTemplate()}
+      ${this._getFixedTypeSizeAvroTemplate()}
+      ${this._getTypeNamespaceAvroTemplate()}
+      ${this._getTypeAliasesAvroTemplate()}
       ${this._deprecatedWarningTemplate()}
       ${this._descriptionTemplate()}
       <property-range-document

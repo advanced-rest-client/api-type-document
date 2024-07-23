@@ -61,5 +61,7 @@ dist/
 # AMF models
 /demo/*.json
 !demo/apis.json
+!demo/avro.json
+!demo/avro2.json
 
 .idea/
