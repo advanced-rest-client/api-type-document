@@ -870,9 +870,11 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
       propertyName,
       parentTypeName,
       hasParentTypeName,
+      isComplex,
+      avroValue
     } = this;
-    if(!hasDisplayName && !propertyName && this.isComplex && this.avroValue){
-      return html`<div class="property-display-name">${this.avroValue}</div>`
+    if(!hasDisplayName && !propertyName && isComplex && avroValue){
+      return html`<div class="property-display-name">${avroValue}</div>`
     }
     return html` ${hasDisplayName
       ? html`<div class="property-display-name">${displayName}</div>`
@@ -894,6 +896,20 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     return html`<div class="deprecated-warning">Warning: Deprecated</div>`
   }
 
+  _noNameAvroClass() {
+    const {
+      hasDisplayName,
+      propertyName,
+      isComplex,
+      avroValue,
+      _renderToggleButton
+    } = this;
+    if(!hasDisplayName && !propertyName && isComplex && !avroValue && _renderToggleButton){
+      return ' no-name'
+    }
+    return ''
+  }
+
   /**
    * @return {TemplateResult} Main render function.
    */
@@ -902,7 +918,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
         ${this.styles}
       </style>
       ${this._headerTemplate()}
-      <div class="property-traits">
+      <div class="property-traits${this._noNameAvroClass()}">
         ${this._getTypeNameTemplate()}
         ${this.isRequired
           ? html`<span
