@@ -311,6 +311,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
       this.isOneOf,
       this.isAllOf
     );
+    console.log("🚀 ~ PropertyShapeDocument ~ _rangeChanged ~ this.isComple:", this.isComplex)
     this.isScalarArray = this.isArray
       ? this._computeIsScalarArray(range)
       : false;
@@ -870,6 +871,9 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
       parentTypeName,
       hasParentTypeName,
     } = this;
+    if(!hasDisplayName && !propertyName && this.isComplex && this.avroValue){
+      return html`<div class="property-display-name">${this.avroValue}</div>`
+    }
     return html` ${hasDisplayName
       ? html`<div class="property-display-name">${displayName}</div>`
       : ''}
