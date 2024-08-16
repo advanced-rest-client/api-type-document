@@ -739,13 +739,24 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     ></api-type-document>`;
   }
 
+  _getTypeLabelData(){
+    const { propertyDataType, avroValue } = this;
+    if(avroValue==='map'){
+      return {dataType:'Map',customValue:false}
+    }
+    if(propertyDataType==='Unknown type' && avroValue){
+      return {dataType:avroValue,customValue:true}
+    }
+    return {dataType:propertyDataType,customValue:false}
+  }
+
   /**
    * @return {TemplateResult} Template for a type name label
    */
   _getTypeNameTemplate() {
-    let dataType = this.propertyDataType;
-    const id = this._targetTypeId;
     const { isScalarArray } = this;
+    let {dataType} = this._getTypeLabelData();
+    const id = this._targetTypeId;
     if (id) {
       const label = this._targetTypeName;
       return html`
@@ -779,6 +790,18 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     }
     return html`
       <div class="fixed-type-size"><span>Size: ${size}</span></div>`;
+  }
+
+  /**
+   * @return {TemplateResult | String} Template size value (only for async / avro)
+   */
+  _getCustomAvroValueTemplate() {
+    const {customValue} = this._getTypeLabelData()
+    if(!customValue){
+      return ''
+    }
+    return html`
+      <div class="fixed-type-size"><span>This is a custom avro value</span></div>`;
   }
 
   /**
@@ -868,8 +891,9 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
       displayName,
       propertyName,
       parentTypeName,
-      hasParentTypeName,
+      hasParentTypeName
     } = this;
+    
     return html` ${hasDisplayName
       ? html`<div class="property-display-name">${displayName}</div>`
       : ''}
@@ -890,6 +914,20 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     return html`<div class="deprecated-warning">Warning: Deprecated</div>`
   }
 
+  _noNameAvroClass() {
+    const {
+      hasDisplayName,
+      propertyName,
+      isComplex,
+      avroValue,
+      _renderToggleButton
+    } = this;
+    if(!hasDisplayName && !propertyName && isComplex && avroValue && _renderToggleButton){
+      return ' no-name'
+    }
+    return ''
+  }
+
   /**
    * @return {TemplateResult} Main render function.
    */
@@ -898,7 +936,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
         ${this.styles}
       </style>
       ${this._headerTemplate()}
-      <div class="property-traits">
+      <div class="property-traits${this._noNameAvroClass()}">
         ${this._getTypeNameTemplate()}
         ${this.isRequired
           ? html`<span
@@ -922,6 +960,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
             >`
           : ''}
       </div>
+      ${this._getCustomAvroValueTemplate()}
       ${this._getDefaultValueAvroTemplate()}
       ${this._getFixedTypeSizeAvroTemplate()}
       ${this._getTypeNamespaceAvroTemplate()}
