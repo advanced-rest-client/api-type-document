@@ -819,6 +819,14 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     return this._multiTypeTemplate({ label, items, typeName, selected, selectTypeCallback, type });
   }
 
+  _getItemLabel(item){
+    if(item.label==='Unknown type' && item.avroValue){
+      return item.avroValue 
+    }
+    return item.label
+
+  }
+
   /**
    *
    * @param {Object} args
@@ -843,8 +851,8 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
             aria-pressed="${selected === index ? 'true' : 'false'}"
             @click="${selectTypeCallback}"
             ?compatibility="${this.compatibility}"
-            title="Select ${item.label} type"
-            >${item.label}</anypoint-button
+            title="Select ${this._getItemLabel(item)} type"
+            >${this._getItemLabel(item)}</anypoint-button
           >`
     )}
       </div>
