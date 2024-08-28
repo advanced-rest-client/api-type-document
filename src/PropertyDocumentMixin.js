@@ -172,6 +172,7 @@ const mxFunction = (base) => {
           return 'String';
         case this._getAmfKey(sc.integer):
         case sc.integer:
+        case sc.int:
           return 'Integer';
         case this._getAmfKey(sc.long):
         case sc.long:
@@ -205,6 +206,10 @@ const mxFunction = (base) => {
         case this._getAmfKey(rs.password):
         case rs.password:
           return 'Password';
+        case sc.bytes:
+          return 'Bytes'
+        case sc.fixed:
+          return 'Fixed'
         default:
           return 'Unknown type';
       }
@@ -356,6 +361,37 @@ const mxFunction = (base) => {
       return this._hasProperty(range, this.ns.w3.shacl.and);
     }
 
+     /**
+   * Computes source values of the property. Only for async / avro
+   *
+   * @param {Object} data Range object of current shape.
+   */
+   _computeAvroSourceMap(data) {
+    try{
+      const sourcesKey = this._getAmfKey(this.ns.aml.vocabularies.docSourceMaps.sources)
+      const avroSchemaKey = this._getAmfKey(this.ns.aml.vocabularies.docSourceMaps.avroSchema)
+      const valueKey = this._getAmfKey(this.ns.aml.vocabularies.docSourceMaps.value)
+      if(data[sourcesKey] && data[sourcesKey][0][avroSchemaKey]){
+         const avroValues = this._ensureArray(data[sourcesKey][0][avroSchemaKey])
+         return avroValues[0][valueKey][0]['@value']
+      }
+      return undefined
+    }catch(_){
+      return undefined
+    }
+   
+  }
+
+    /**
+   * Computes source values of the property. Only for async / avro
+   *
+   * @param {Object} data Range object of current shape.
+   * @return {Object} Size of the property
+   */
+  _computeAvroShapeRangeSourceMap(data) {
+    return this._computeAvroSourceMap(data)
+   }
+
     /**
      * Computes list of type labels to render.
      *
@@ -369,6 +405,7 @@ const mxFunction = (base) => {
         return undefined;
       }
       return list.map((obj) => {
+        const avroValue = this._computeAvroShapeRangeSourceMap(obj) || null
         let item = obj;
         if (Array.isArray(item)) {
           [item] = item;
@@ -419,6 +456,7 @@ const mxFunction = (base) => {
           isArray,
           isType,
           label,
+          avroValue
         };
       });
     }

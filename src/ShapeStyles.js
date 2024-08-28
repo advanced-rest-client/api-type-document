@@ -1,17 +1,11 @@
-import { css } from 'lit-element';
+import { css } from "lit-element";
 
 export default css`
   :host {
     display: block;
     border-bottom-width: 1px;
-    border-bottom-color: var(
-      --property-shape-document-border-bottom-color,
-      #cfd8dc
-    );
-    border-bottom-style: var(
-      --property-shape-document-border-bottom-style,
-      dashed
-    );
+    border-bottom-color: var(--property-shape-document-border-bottom-color, #cfd8dc);
+    border-bottom-style: var(--property-shape-document-border-bottom-style, dashed);
     padding: var(--property-shape-document-padding);
   }
 
@@ -24,27 +18,12 @@ export default css`
   }
 
   .property-title {
-    font-family: var(
-      --property-shape-document-title-font-family,
-      var(--arc-font-subhead-font-family)
-    );
-    font-size: var(
-      --property-shape-document-title-font-size,
-      var(--arc-font-subhead-font-size, 1rem)
-    );
-    font-weight: var(
-      --property-shape-document-title-font-weight,
-      var(--arc-font-subhead-font-weight)
-    );
-    line-height: var(
-      --property-shape-document-title-line-height,
-      var(--arc-font-subhead-line-height)
-    );
+    font-family: var(--property-shape-document-title-font-family, var(--arc-font-subhead-font-family));
+    font-size: var(--property-shape-document-title-font-size, var(--arc-font-subhead-font-size, 1rem));
+    font-weight: var(--property-shape-document-title-font-weight, var(--arc-font-subhead-font-weight));
+    line-height: var(--property-shape-document-title-line-height, var(--arc-font-subhead-line-height));
 
-    margin: var(
-      --property-shape-document-title-margin,
-      4px 0 4px 0
-    );
+    margin: var(--property-shape-document-title-margin, 4px 0 4px 0);
     font-size: 1rem;
     font-weight: var(--api-type-document-property-title-font-weight, 500);
     word-break: break-word;
@@ -52,10 +31,7 @@ export default css`
   }
 
   .property-title[secondary] {
-    font-weight: var(
-      --api-type-document-property-title-secondary-font-weight,
-      400
-    );
+    font-weight: var(--api-type-document-property-title-secondary-font-weight, 400);
     color: var(--api-type-document-property-title-secondary-color, #616161);
   }
 
@@ -65,10 +41,7 @@ export default css`
 
   .property-display-name {
     font-weight: var(--api-type-document-property-name-font-weight, 500);
-    color: var(
-      --api-type-document-property-name-color,
-      var(--api-type-document-property-color, #212121)
-    );
+    color: var(--api-type-document-property-name-color, var(--api-type-document-property-color, #212121));
     margin: 4px 0 4px 0;
     font-size: var(--api-type-document-property-name-font-size, 16px);
   }
@@ -117,6 +90,10 @@ export default css`
     margin-bottom: 8px;
   }
 
+  .property-traits.no-name {
+    margin-top: -33px;
+  }
+
   .property-traits > span {
     display: inline-block;
     margin-right: 8px;
@@ -132,6 +109,10 @@ export default css`
     color: var(--api-type-document-type-color, white);
     padding: var(--api-type-document-trait-data-type-padding, 2px 4px);
     font-weight: var(--api-type-document-trait-data-type-font-weight, normal);
+  }
+
+  .property-traits > span.fixed-type-size {
+    padding: var(--api-type-document-trait-fixed-type-size-padding, 2px 1px);
   }
 
   arc-marked {
@@ -159,7 +140,7 @@ export default css`
     -ms-flex: 1;
     flex: 1;
   }
-  
+
   .property-traits > span.readonly-type {
     background-color: var(--api-type-readonly-property-background-color, #ff9292);
     color: var(--api-type-readonly-property-color, black);
