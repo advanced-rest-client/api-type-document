@@ -801,7 +801,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
       return ''
     }
     return html`
-      <div class="fixed-type-size"><span>This is a custom avro value</span></div>`;
+      <div class="fixed-type-size"><span>This is a custom Avro type. You can read the definitions for this value in the specification.</span></div>`;
   }
 
   /**
