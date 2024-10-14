@@ -516,6 +516,31 @@ const mxFunction = (base) => {
       return /** @type string */ (this._getValue(range, coreName));
     }
 
+    _computeParentName(range, shape) {
+      if (!shape || !range) {
+        return undefined;
+      }
+      // let name;
+      if (
+        this._hasType(shape, this.ns.aml.vocabularies.apiContract.Parameter)
+      ) {
+        return /** @type string */ (this._getValue(
+          range,
+          this.ns.aml.vocabularies.core.name
+        ));
+      }
+      if (this._hasType(range, this.ns.w3.shacl.NodeShape)) {
+        return /** @type string */ (this._getValue(
+          shape,
+          this.ns.w3.shacl.name
+        ));
+      }
+      return /** @type string */ (this._getValue(
+        range,
+        this.ns.aml.vocabularies.core.name
+      ));
+    }
+
     _computeHasMediaType(mediaType) {
       return !!mediaType;
     }

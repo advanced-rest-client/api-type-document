@@ -25,7 +25,7 @@ interface PropertyDocumentMixin extends AmfHelperMixin {
    * This is used to select/generate examples according to current body
    * media type. When not set it only renders examples that were defined
    * in API spec file in a form as they were written.
-   * 
+   *
    * @attribute
    */
   mediaType: string;
@@ -55,7 +55,7 @@ interface PropertyDocumentMixin extends AmfHelperMixin {
    * @param range AMF property range object
    * @returns Data type of the property.
    */
-  _computeRangeDataType(range: Object): String|undefined;
+  _computeRangeDataType(range: Object): String | undefined;
 
   /**
    * Computes type from a scalar shape.
@@ -78,7 +78,7 @@ interface PropertyDocumentMixin extends AmfHelperMixin {
    * @param range Range object of current shape.
    * @returns List of Array items.
    */
-  _computeArrayProperties(range: Object): ArrayPropertyItem[]|undefined;
+  _computeArrayProperties(range: Object): ArrayPropertyItem[] | undefined;
 
   /**
    * Computes value for `isUnion` property.
@@ -110,7 +110,7 @@ interface PropertyDocumentMixin extends AmfHelperMixin {
   /**
    * Computes value for `isAnyOf` property.
    * AnyOf type is identified as a `http://www.w3.org/ns/shacl#or`
-   * 
+   *
    * @param range Range object of current shape.
    */
   _computeIsAnyOf(range: Object): boolean
@@ -141,7 +141,7 @@ interface PropertyDocumentMixin extends AmfHelperMixin {
    * @param items Array's items property or a single property
    * @returns Label for the union type.
    */
-  _computeArrayUnionLabel(items: object|object[]): string|undefined;
+  _computeArrayUnionLabel(items: object | object[]): string | undefined;
 
   /**
    * Computes name label for the shape.
@@ -150,7 +150,9 @@ interface PropertyDocumentMixin extends AmfHelperMixin {
    * @param shape The shape of the property.
    * @returns Display name of the property
    */
-  _computeDisplayName(range: Object, shape: Object): string|undefined;
+  _computeDisplayName(range: Object, shape: Object): string | undefined;
+
+  _computeParentName(range: Object, shape: Object): string | undefined;
 
   _computeHasMediaType(mediaType: string): boolean;
 
@@ -159,5 +161,5 @@ interface PropertyDocumentMixin extends AmfHelperMixin {
   _isPropertyReadOnly(property: any): boolean;
   _isReadOnly(property: any): boolean;
 }
-export {PropertyDocumentMixinConstructor};
-export {PropertyDocumentMixin};
+export { PropertyDocumentMixinConstructor };
+export { PropertyDocumentMixin };

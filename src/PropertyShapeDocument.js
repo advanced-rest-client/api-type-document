@@ -123,7 +123,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
       /**
        * A description of the shape to render.
        */
-      shapeDescription: { type: String },      
+      shapeDescription: { type: String },
       /**
        * Computed value, true if description is set.
        */
@@ -319,6 +319,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
 
   _shapeRangeChanged(shape, range) {
     this.displayName = this._computeDisplayName(range, shape);
+    this.parentName = this.isObject ? this._computeParentName(range, shape) : undefined;
     this.propertyName = this._computePropertyName(range, shape);
     this.avroValue = this._computeAvroShapeRangeSourceMap(range, shape)
     const {size,namespace,aliases, defaultValue} = this._computeAvroProperties(range, shape)
@@ -326,8 +327,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     this.namespace = namespace
     this.aliases = aliases
     this.defaultValue = defaultValue
-    
-    
+
     this.hasDisplayName = this._computeHasDisplayName(
       this.displayName,
       this.propertyName
@@ -498,7 +498,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     }catch(_){
       return undefined
     }
-   
+
   }
 
   /**
@@ -518,7 +518,6 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
 
 
 
-  
 
   /**
    * Computes value for `hasDisplayName` property.
@@ -714,6 +713,16 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     return this._hasType(item, this.ns.aml.vocabularies.shapes.ScalarShape);
   }
 
+  _getParentTypeName() {
+    if (this.isArray) {
+      return 'item'
+    }
+    if(this.isObject){
+      return this.parentName
+    }
+    return this.displayName
+  }
+
   /**
    * @return {TemplateResult|string} Template for a complex shape (object/array/union)
    */
@@ -722,7 +731,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
       return '';
     }
     const range = this._resolve(this.range);
-    const parentTypeName = this.isArray ? 'item' : this.displayName;
+    const parentTypeName = this._getParentTypeName();
     return html`<api-type-document
       class="children complex"
       .amf="${this.amf}"
@@ -843,7 +852,6 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
   `;
 }
 
-  
 
   /**
    * @return {TemplateResult|string} Template for the description
@@ -893,7 +901,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
       parentTypeName,
       hasParentTypeName
     } = this;
-    
+
     return html` ${hasDisplayName
       ? html`<div class="property-display-name">${displayName}</div>`
       : ''}
