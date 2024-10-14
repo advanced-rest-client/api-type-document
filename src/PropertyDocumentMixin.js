@@ -379,7 +379,7 @@ const mxFunction = (base) => {
     }catch(_){
       return undefined
     }
-   
+
   }
 
     /**
@@ -493,25 +493,27 @@ const mxFunction = (base) => {
       if (!shape || !range) {
         return undefined;
       }
-      // let name;
-      if (
-        this._hasType(shape, this.ns.aml.vocabularies.apiContract.Parameter)
-      ) {
-        return /** @type string */ (this._getValue(
-          range,
-          this.ns.aml.vocabularies.core.name
-        ));
+
+      const coreName = this.ns.aml.vocabularies.core.name;
+      const shaclName = this.ns.w3.shacl.name;
+      const parameterType = this.ns.aml.vocabularies.apiContract.Parameter;
+      const nodeShapeType = this.ns.w3.shacl.NodeShape;
+
+      // Check if the shape is of type Parameter
+      if (this._hasType(shape, parameterType)) {
+        return /** @type string */ (this._getValue(range, coreName));
       }
-      if (this._hasType(range, this.ns.w3.shacl.NodeShape)) {
-        return /** @type string */ (this._getValue(
-          shape,
-          this.ns.w3.shacl.name
-        ));
+
+      // Check if the range is of type NodeShape
+      if (this._hasType(range, nodeShapeType)) {
+        return (
+          /** @type string */ (this._getValue(range, coreName)) ||
+          /** @type string */ (this._getValue(shape, shaclName))
+        );
       }
-      return /** @type string */ (this._getValue(
-        range,
-        this.ns.aml.vocabularies.core.name
-      ));
+
+      // Default case: return the core name from the range
+      return /** @type string */ (this._getValue(range, coreName));
     }
 
     _computeHasMediaType(mediaType) {
