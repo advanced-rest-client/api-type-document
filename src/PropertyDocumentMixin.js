@@ -379,7 +379,7 @@ const mxFunction = (base) => {
     }catch(_){
       return undefined
     }
-   
+
   }
 
     /**
@@ -490,6 +490,33 @@ const mxFunction = (base) => {
      * @return {string|undefined} Display name of the property
      */
     _computeDisplayName(range, shape) {
+      if (!shape || !range) {
+        return undefined;
+      }
+
+      const coreName = this.ns.aml.vocabularies.core.name;
+      const shaclName = this.ns.w3.shacl.name;
+      const parameterType = this.ns.aml.vocabularies.apiContract.Parameter;
+      const nodeShapeType = this.ns.w3.shacl.NodeShape;
+
+      // Check if the shape is of type Parameter
+      if (this._hasType(shape, parameterType)) {
+        return /** @type string */ (this._getValue(range, coreName));
+      }
+
+      // Check if the range is of type NodeShape
+      if (this._hasType(range, nodeShapeType)) {
+        return (
+          /** @type string */ (this._getValue(range, coreName)) ||
+          /** @type string */ (this._getValue(shape, shaclName))
+        );
+      }
+
+      // Default case: return the core name from the range
+      return /** @type string */ (this._getValue(range, coreName));
+    }
+
+    _computeParentName(range, shape) {
       if (!shape || !range) {
         return undefined;
       }
