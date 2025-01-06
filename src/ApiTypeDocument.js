@@ -1,10 +1,10 @@
-import { LitElement, html } from 'lit-element';
-import '@anypoint-web-components/anypoint-button/anypoint-button.js';
-import '@api-components/api-resource-example-document/api-resource-example-document.js';
-import '../property-shape-document.js';
-import '../property-range-document.js';
-import { PropertyDocumentMixin } from './PropertyDocumentMixin.js';
-import typeStyles from './TypeStyles.js';
+import { LitElement, html } from "lit-element";
+import "@anypoint-web-components/anypoint-button/anypoint-button.js";
+import "@api-components/api-resource-example-document/api-resource-example-document.js";
+import "../property-shape-document.js";
+import "../property-range-document.js";
+import { PropertyDocumentMixin } from "./PropertyDocumentMixin.js";
+import typeStyles from "./TypeStyles.js";
 
 /** @typedef {import('@anypoint-web-components/anypoint-button').AnypointButton} AnypointButton */
 /** @typedef {import('lit-element').TemplateResult} TemplateResult */
@@ -182,7 +182,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       return;
     }
     this._type = value;
-    this.requestUpdate('type', old);
+    this.requestUpdate("type", old);
     this._resolvedType = /** @type any[] */ (this._resolve(value));
     this.__typeChanged();
   }
@@ -203,7 +203,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       return;
     }
     this._mediaTypes = value;
-    this.requestUpdate('mediaTypes', old);
+    this.requestUpdate("mediaTypes", old);
     this._mediaTypesChanged(value);
   }
 
@@ -217,7 +217,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       return;
     }
     this._parentTypeName = value;
-    this.requestUpdate('parentTypeName', old);
+    this.requestUpdate("parentTypeName", old);
     this.hasParentType = !!value;
   }
 
@@ -231,8 +231,8 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       return;
     }
     this._unionTypes = value;
-    this.requestUpdate('unionTypes', old);
-    this._multiTypesChanged('selectedUnion', value);
+    this.requestUpdate("unionTypes", old);
+    this._multiTypesChanged("selectedUnion", value);
   }
 
   get oneOfTypes() {
@@ -245,8 +245,8 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       return;
     }
     this._oneOfTypes = value;
-    this.requestUpdate('oneOfTypes', old);
-    this._multiTypesChanged('selectedOneOf', value);
+    this.requestUpdate("oneOfTypes", old);
+    this._multiTypesChanged("selectedOneOf", value);
   }
 
   get anyOfTypes() {
@@ -259,8 +259,8 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       return;
     }
     this._anyOfTypes = value;
-    this.requestUpdate('anyOfTypes', old);
-    this._multiTypesChanged('selectedAnyOf', value);
+    this.requestUpdate("anyOfTypes", old);
+    this._multiTypesChanged("selectedAnyOf", value);
   }
 
   get noMainExample() {
@@ -273,11 +273,8 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       return;
     }
     this._noMainExample = value;
-    this.requestUpdate('noMainExample', old);
-    this._renderMainExample = this._computeRenderMainExample(
-      value,
-      this._hasExamples
-    );
+    this.requestUpdate("noMainExample", old);
+    this._renderMainExample = this._computeRenderMainExample(value, this._hasExamples);
   }
 
   get _hasExamples() {
@@ -290,13 +287,9 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       return;
     }
     this.__hasExamples = value;
-    this.requestUpdate('_hasExamples', old);
+    this.requestUpdate("_hasExamples", old);
     const scalarType = this._hasType(this.type, this.ns.aml.vocabularies.shapes.ScalarShape);
-    this._renderMainExample = this._computeRenderMainExample(
-      this.noMainExample,
-      value,
-      scalarType
-    );
+    this._renderMainExample = this._computeRenderMainExample(this.noMainExample, value, scalarType);
   }
 
   get shouldRenderMediaSelector() {
@@ -312,15 +305,15 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     this.hasParentType = false;
     this.narrow = false;
     this.selectedBodyId = undefined;
-    /** 
+    /**
      * @type {number}
      */
     this.selectedUnion = undefined;
-    /** 
+    /**
      * @type {number}
      */
     this.selectedOneOf = undefined;
-    /** 
+    /**
      * @type {number}
      */
     this.selectedAnyOf = undefined;
@@ -377,8 +370,8 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     let isAnd = false;
     let isOneOf = false;
     let isAnyOf = false;
-    let key = ''
-    const shapesKey = this.ns.aml.vocabularies.shapes
+    let key = "";
+    const shapesKey = this.ns.aml.vocabularies.shapes;
     if (type instanceof Array) {
       isObject = true;
     } else if (this._hasType(type, shapesKey.ScalarShape) || this._hasType(type, shapesKey.NilShape)) {
@@ -394,9 +387,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
         key = this._getAmfKey(this.ns.w3.shacl.or);
         this.anyOfTypes = this._computeTypes(type, key);
       }
-    } else if (
-      this._hasType(type, shapesKey.UnionShape)
-    ) {
+    } else if (this._hasType(type, shapesKey.UnionShape)) {
       isUnion = true;
       key = this._getAmfKey(shapesKey.anyOf);
       this.unionTypes = this._computeTypes(type, key);
@@ -408,9 +399,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       isAnyOf = true;
       key = this._getAmfKey(this.ns.w3.shacl.or);
       this.anyOfTypes = this._computeTypes(type, key);
-    } else if (
-      this._hasType(type, shapesKey.ArrayShape)
-    ) {
+    } else if (this._hasType(type, shapesKey.ArrayShape)) {
       isArray = true;
       const iKey = this._getAmfKey(shapesKey.items);
       let items = this._ensureArray(type[iKey]);
@@ -464,7 +453,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
    * @return {string} Parent type name of default value for array type.
    */
   _computeArrayParentName(parent) {
-    return parent || '';
+    return parent || "";
   }
 
   /**
@@ -560,23 +549,23 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     if (Array.isArray(item)) {
       return item;
     }
-    
+
     const propertyKey = this._getAmfKey(this.ns.w3.shacl.property);
-    const itemProperties = this._ensureArray(item[propertyKey]||[])
+    const itemProperties = this._ensureArray(item[propertyKey] || []);
     const additionalPropertiesKey = this._getAmfKey(this.ns.w3.shacl.additionalPropertiesSchema);
 
     // If the item doesn't have additional properties, filter the read-only properties and return
     if (!item[additionalPropertiesKey]) {
-      return this._filterReadOnlyProperties(itemProperties)
+      return this._filterReadOnlyProperties(itemProperties);
     }
 
-    const additionalPropertiesSchema = this._ensureArray(item[additionalPropertiesKey])
-    
+    const additionalPropertiesSchema = this._ensureArray(item[additionalPropertiesKey]);
+
     // If the item does have additional properties, ensure they are in an array
-    const additionalProperties = this._ensureArray(additionalPropertiesSchema[0][propertyKey] || additionalPropertiesSchema[0])
+    const additionalProperties = this._ensureArray(additionalPropertiesSchema[0][propertyKey] || additionalPropertiesSchema[0]);
 
     // Combine the item's properties and additional properties
-    const combinedProperties = [...itemProperties, ...additionalProperties]
+    const combinedProperties = [...itemProperties, ...additionalProperties];
 
     // Filter the read-only properties and return
     return this._filterReadOnlyProperties(combinedProperties);
@@ -596,17 +585,11 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
         [item] = item;
       }
       item = this._resolve(item);
-      let label = /** @type string */ (this._getValue(
-        item,
-        this.ns.aml.vocabularies.core.name
-      ));
+      let label = /** @type string */ (this._getValue(item, this.ns.aml.vocabularies.core.name));
       if (!label) {
-        label = /** @type string */ (this._getValue(
-          item,
-          this.ns.w3.shacl.name
-        ));
+        label = /** @type string */ (this._getValue(item, this.ns.w3.shacl.name));
       }
-      if (label && label.indexOf('item') === 0) {
+      if (label && label.indexOf("item") === 0) {
         label = undefined;
       }
       return {
@@ -672,12 +655,25 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
   }
 
   /**
+   * Return the type mappings
+   */
+  _typesMappings(item) {
+    const itemName = this._getValue(item, this._getAmfKey(this.ns.w3.shacl.name));
+    const typeTarget = this._getValue(this.type, this._getAmfKey(this.ns.aml.vocabularies.shapes.discriminator));
+    let type;
+    if (itemName && typeTarget && itemName === typeTarget) {
+      type = this.type;
+    }
+    return type;
+  }
+
+  /**
    * @return {TemplateResult[]|string} Templates for object properties
    */
   _objectTemplate() {
     const items = this._computeProperties(this._resolvedType);
     if (!items || !items.length) {
-      return '';
+      return "";
     }
     return items.map(
       (item) => html`<property-shape-document
@@ -691,30 +687,31 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
         ?graph="${this.graph}"
         .mediaType="${this.mediaType}"
         ?renderReadOnly="${this.renderReadOnly}"
+        .discriminatorMapping="${this._typesMappings(item)}"
       ></property-shape-document>`
     );
   }
 
   _arrayPropertyTemplate(label, value, title) {
     return html`
-        <div class="property-attribute" part="property-attribute">
-          <span class="attribute-label" part="attribute-label">${label}</span>
-          <span class="attribute-value" part="attribute-value" title=${title}>${value}</span>
-        </div>
-        `
+      <div class="property-attribute" part="property-attribute">
+        <span class="attribute-label" part="attribute-label">${label}</span>
+        <span class="attribute-value" part="attribute-value" title=${title}>${value}</span>
+      </div>
+    `;
   }
 
   _arrayPropertiesTemplate() {
     if (!this.noArrayInfo) {
-      const minCount = this._getValue(this._resolvedType, this.ns.w3.shacl.minCount)
-      const maxCount = this._getValue(this._resolvedType, this.ns.w3.shacl.maxCount)
+      const minCount = this._getValue(this._resolvedType, this.ns.w3.shacl.minCount);
+      const maxCount = this._getValue(this._resolvedType, this.ns.w3.shacl.maxCount);
 
       return html`
-          ${minCount !== undefined ? this._arrayPropertyTemplate('Minimum array length:', minCount, 'Minimum amount of items in array') : ''}
-          ${maxCount !== undefined ? this._arrayPropertyTemplate('Maximum array length:', maxCount, 'Maximum amount of items in array') : ''}
-      `
+        ${minCount !== undefined ? this._arrayPropertyTemplate("Minimum array length:", minCount, "Minimum amount of items in array") : ""}
+        ${maxCount !== undefined ? this._arrayPropertyTemplate("Maximum array length:", maxCount, "Maximum amount of items in array") : ""}
+      `;
     }
-    return html``
+    return html``;
   }
 
   /**
@@ -736,7 +733,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
               .mediaType="${this.mediaType}"
               ?graph="${this.graph}"
             ></property-shape-document>`
-          : ''}
+          : ""}
         ${item.isType
           ? html`<api-type-document
               class="union-document"
@@ -750,20 +747,15 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
               .mediaType="${this.mediaType}"
               ?graph="${this.graph}"
             ></api-type-document>`
-          : ''}
+          : ""}
       `
     );
 
     return html`
-      ${!this.hasParentType ?
-        html`
-        <span>Array of:</span>
-        <div class="array-children">
-          ${documents}
-        </div>`
-        : html`${documents}`
-      }
-    
+      ${!this.hasParentType
+        ? html` <span>Array of:</span>
+            <div class="array-children">${documents}</div>`
+        : html`${documents}`}
       ${this._arrayPropertiesTemplate()}
     `;
   }
@@ -774,11 +766,11 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
   _unionTemplate() {
     const items = this.unionTypes || [];
     const selected = this.selectedUnion;
-    const selectTypeCallback = this._selectType.bind(this, 'selectedUnion');
+    const selectTypeCallback = this._selectType.bind(this, "selectedUnion");
     const key = this._getAmfKey(this.ns.aml.vocabularies.shapes.anyOf);
     const type = this._computeProperty(this._resolvedType, key, selected);
-    const typeName = 'union'
-    const label = 'Any of'
+    const typeName = "union";
+    const label = "Any of";
     return this._multiTypeTemplate({ label, items, typeName, selected, selectTypeCallback, type });
   }
 
@@ -788,10 +780,10 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
    */
   _oneOfTemplate() {
     const items = this.oneOfTypes;
-    const label = 'One of';
-    const typeName = 'one-of';
+    const label = "One of";
+    const typeName = "one-of";
     const selected = this.selectedOneOf;
-    const selectTypeCallback = this._selectType.bind(this, 'selectedOneOf');
+    const selectTypeCallback = this._selectType.bind(this, "selectedOneOf");
     const key = this._getAmfKey(this.ns.w3.shacl.xone);
     const type = this._computeProperty(this._resolvedType, key, selected);
     return this._multiTypeTemplate({ label, items, typeName, selected, selectTypeCallback, type });
@@ -803,10 +795,10 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
    */
   _anyOfTemplate() {
     const items = this.anyOfTypes;
-    const label = 'Any of';
-    const typeName = 'any-of';
+    const label = "Any of";
+    const typeName = "any-of";
     const selected = this.selectedAnyOf;
-    const selectTypeCallback = this._selectType.bind(this, 'selectedAnyOf');
+    const selectTypeCallback = this._selectType.bind(this, "selectedAnyOf");
     const key = this._getAmfKey(this.ns.w3.shacl.or);
     let type = this._computeProperty(this._resolvedType, key, selected);
     if (!type) {
@@ -819,12 +811,11 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     return this._multiTypeTemplate({ label, items, typeName, selected, selectTypeCallback, type });
   }
 
-  _getItemLabel(item){
-    if(item.label==='Unknown type' && item.avroValue){
-      return item.avroValue 
+  _getItemLabel(item) {
+    if (item.label === "Unknown type" && item.avroValue) {
+      return item.avroValue;
     }
-    return item.label
-
+    return item.label;
   }
 
   /**
@@ -844,17 +835,17 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       <div class="union-type-selector">
         <span>${label}:</span>
         ${items.map(
-      (item, index) => html`<anypoint-button
+          (item, index) => html`<anypoint-button
             class="${typeName}-toggle"
             data-index="${index}"
             ?activated="${selected === index}"
-            aria-pressed="${selected === index ? 'true' : 'false'}"
+            aria-pressed="${selected === index ? "true" : "false"}"
             @click="${selectTypeCallback}"
             ?compatibility="${this.compatibility}"
             title="Select ${this._getItemLabel(item)} type"
             >${this._getItemLabel(item)}</anypoint-button
           >`
-    )}
+        )}
       </div>
       <api-type-document
         class="${typeName}-document"
@@ -877,14 +868,10 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
   _anyTemplate() {
     const items = this.andTypes;
     if (!items || !items.length) {
-      return '';
+      return "";
     }
     return html` ${items.map(
-      (item) => html` ${item.label
-        ? html`<p class="inheritance-label">
-              Properties inherited from <b>${item.label}</b>.
-            </p>`
-        : html`<p class="inheritance-label">Properties defined inline.</p>`}
+      (item) => html` ${item.label ? html`<p class="inheritance-label">Properties inherited from <b>${item.label}</b>.</p>` : html`<p class="inheritance-label">Properties defined inline.</p>`}
         <api-type-document
           class="and-document"
           .amf="${this.amf}"
@@ -903,22 +890,21 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
    * @return {TemplateResult} Template for the element
    */
   render() {
-    let parts =
-      'content-action-button, code-content-action-button, content-action-button-disabled, ';
-    parts +=
-      'code-content-action-button-disabled content-action-button-active, ';
-    parts +=
-      'code-content-action-button-active, code-wrapper, example-code-wrapper, markdown-html';
-    const mediaTypes = (this.mediaTypes || []);
-    return html`<style>${this.styles}</style>
+    let parts = "content-action-button, code-content-action-button, content-action-button-disabled, ";
+    parts += "code-content-action-button-disabled content-action-button-active, ";
+    parts += "code-content-action-button-active, code-wrapper, example-code-wrapper, markdown-html";
+    const mediaTypes = this.mediaTypes || [];
+    return html`<style>
+        ${this.styles}
+      </style>
       <section class="examples" ?hidden="${!this._renderMainExample}">
         ${this.shouldRenderMediaSelector
-        ? html`<div class="media-type-selector">
+          ? html`<div class="media-type-selector">
               <span>Media type:</span>
               ${mediaTypes.map((item, index) => {
-          const selected = this.selectedMediaType === index;
-          const pressed = selected ? 'true' : 'false';
-          return html`<anypoint-button
+                const selected = this.selectedMediaType === index;
+                const pressed = selected ? "true" : "false";
+                return html`<anypoint-button
                   part="content-action-button"
                   class="media-toggle"
                   data-index="${index}"
@@ -929,9 +915,9 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
                   title="Select ${item} media type"
                   >${item}</anypoint-button
                 >`;
-        })}
+              })}
             </div>`
-        : ''}
+          : ""}
 
         <api-resource-example-document
           .amf="${this.amf}"
@@ -949,8 +935,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
         ></api-resource-example-document>
       </section>
 
-      ${this.isObject ? this._objectTemplate() : ''}
-      ${this.isArray ? this._arrayTemplate() : ''}
+      ${this.isObject ? this._objectTemplate() : ""} ${this.isArray ? this._arrayTemplate() : ""}
       ${this.isScalar
         ? html`<property-shape-document
             class="shape-document"
@@ -963,11 +948,8 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
             .mediaType="${this.mediaType}"
             ?graph="${this.graph}"
           ></property-shape-document>`
-        : ''}
-      ${this.isUnion ? this._unionTemplate() : ''}
-      ${this.isAnd ? this._anyTemplate() : ''}
-      ${this.isAnyOf ? this._anyOfTemplate() : ''}
-      ${this.isOneOf ? this._oneOfTemplate() : ''}`;
+        : ""}
+      ${this.isUnion ? this._unionTemplate() : ""} ${this.isAnd ? this._anyTemplate() : ""} ${this.isAnyOf ? this._anyOfTemplate() : ""} ${this.isOneOf ? this._oneOfTemplate() : ""}`;
   }
 
   _filterReadOnlyProperties(properties) {

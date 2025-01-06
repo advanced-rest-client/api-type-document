@@ -1,10 +1,10 @@
-import { LitElement, CSSResult, TemplateResult } from 'lit-element';
-import { PropertyDocumentMixin } from './PropertyDocumentMixin.js';
+import { LitElement, CSSResult, TemplateResult } from "lit-element";
+import { PropertyDocumentMixin } from "./PropertyDocumentMixin.js";
 
 /**
  * Renders a documentation for a shape property of AMF model.
  */
-export class PropertyShapeDocument extends  PropertyDocumentMixin(LitElement) {
+export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
   readonly styles: CSSResult[];
   range: any;
   /**
@@ -142,7 +142,12 @@ export class PropertyShapeDocument extends  PropertyDocumentMixin(LitElement) {
    * Determines if shape's range is deprecated
    * @attribute
    */
-  deprecated: boolean
+  deprecated: boolean;
+  /**
+   * List type mappings
+   * @attribute
+   */
+  discriminatorMapping: any;
 
   get complexToggleLabel(): string;
 
@@ -172,7 +177,7 @@ export class PropertyShapeDocument extends  PropertyDocumentMixin(LitElement) {
    * @param shape The shape object
    * @returns Display name of the property
    */
-  _computePropertyName(range: object, shape: object): string|undefined;
+  _computePropertyName(range: object, shape: object): string | undefined;
 
   /**
    * Computes value for `hasDisplayName` property.
@@ -210,7 +215,7 @@ export class PropertyShapeDocument extends  PropertyDocumentMixin(LitElement) {
    * @param range Range model
    * @returns Description to render.
    */
-  _computeDescription(range: object): string|undefined;
+  _computeDescription(range: object): string | undefined;
 
   /**
    * Computes value for `isComplex` property.
@@ -242,7 +247,7 @@ export class PropertyShapeDocument extends  PropertyDocumentMixin(LitElement) {
   /**
    * @returns Template for a complex shape (object/array/union)
    */
-  _complexTemplate(): TemplateResult|string;
+  _complexTemplate(): TemplateResult | string;
 
   /**
    * @returns Template for a type name label
@@ -252,7 +257,7 @@ export class PropertyShapeDocument extends  PropertyDocumentMixin(LitElement) {
   /**
    * @returns Template for the description
    */
-  _descriptionTemplate(): TemplateResult|string;
+  _descriptionTemplate(): TemplateResult | string;
 
   /**
    * @returns Template for type name header
