@@ -143,6 +143,11 @@ export class PropertyShapeDocument extends  PropertyDocumentMixin(LitElement) {
    * @attribute
    */
   deprecated: boolean
+  /**
+   * List type mappings
+   * @attribute
+   */
+  discriminatorMapping: any;
 
   get complexToggleLabel(): string;
 

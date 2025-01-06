@@ -65,3 +65,4 @@ dist/
 !demo/avro2.json
 
 .idea/
+.codegenie/
