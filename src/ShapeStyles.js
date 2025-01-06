@@ -163,4 +163,14 @@ export default css`
     border-radius: var(--api-type-document-deprecated-warning-border-radius, 3px);
     display: inline-flex;
   }
+  .types-mappings-container {
+    margin-top: -10px;
+  }
+  .types-mappings-item {
+    cursor: pointer;
+    color: var(--link-color, #0277bd);
+  }
+  .types-mappings-item:hover {
+    text-decoration: underline;
+  }
 `;

@@ -159,6 +159,10 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
        * Determines if shape's range is deprecated
        */
       deprecated: { type: Boolean, reflect: true },
+      /**
+       * Used for discriminator types mappings
+       */
+      discriminatorMapping: { type: Object },   
     };
   }
 
@@ -247,6 +251,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     this.narrow = false;
     this.renderReadOnly = false;
     this.deprecated = false;
+    this.discriminatorMapping = undefined;
   }
 
   connectedCallback() {
@@ -936,6 +941,42 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     return ''
   }
 
+  _navigateItem(e) {
+    e.preventDefault();
+    const data = e.composedPath()[0].dataset;
+    if (!data.id || !data.shapeType) {
+      return;
+    }
+    const ev = new CustomEvent("api-navigation-selection-changed", {
+      bubbles: true,
+      composed: true,
+      detail: {
+        selected: data.id,
+        type: data.shapeType,
+      },
+    });
+    this.dispatchEvent(ev);
+  }
+
+  _keydownNavigateItem(e) {
+    if (e.key === "Enter") {
+      this._navigateItem(e);
+    }
+  }
+
+  _typesMappingsTemplate() {
+    const mappings = this._getValueArray(this.discriminatorMapping, this._getAmfKey(this.ns.aml.vocabularies.shapes.discriminatorValueMapping));
+    if (!mappings) return html``;
+
+    return html`<ul class="types-mappings-container">
+      ${mappings.map((mapping) => {
+        const name = this._getValue(mapping, this._getAmfKey(this.ns.aml.vocabularies.shapes.discriminatorValue));
+        const target = this._getLinkValue(mapping, this._getAmfKey(this.ns.aml.vocabularies.shapes.discriminatorValueTarget));
+        return html`<li class="types-mappings-item" data-id="${target}" data-shape-type="type" @click="${this._navigateItem}" @keydown="${this._keydownNavigateItem}">${name}</li>`;
+      })}
+    </ul>`;
+  }
+
   /**
    * @return {TemplateResult} Main render function.
    */
@@ -975,6 +1016,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
       ${this._getTypeAliasesAvroTemplate()}
       ${this._deprecatedWarningTemplate()}
       ${this._descriptionTemplate()}
+      ${this._typesMappingsTemplate()}
       <property-range-document
         .amf="${this.amf}"
         .shape="${this.shape}"

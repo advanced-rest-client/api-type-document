@@ -672,6 +672,19 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
   }
 
   /**
+   * Return the type mappings
+   */
+  _typesMappings(item) {
+    const itemName = this._getValue(item, this._getAmfKey(this.ns.w3.shacl.name));
+    const typeTarget = this._getValue(this.type, this._getAmfKey(this.ns.aml.vocabularies.shapes.discriminator));
+    let type;
+    if (itemName && typeTarget && itemName === typeTarget) {
+      type = this.type;
+    }
+    return type;
+  }
+
+  /**
    * @return {TemplateResult[]|string} Templates for object properties
    */
   _objectTemplate() {
@@ -691,6 +704,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
         ?graph="${this.graph}"
         .mediaType="${this.mediaType}"
         ?renderReadOnly="${this.renderReadOnly}"
+        .discriminatorMapping="${this._typesMappings(item)}"
       ></property-shape-document>`
     );
   }
