@@ -753,6 +753,24 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     ></api-type-document>`;
   }
 
+  _extractElementsDataType(namespaceKey){
+    const key = this._getAmfKey(namespaceKey)
+    const dataTypes = this.range[key]
+    if(!dataTypes){
+      return 'Any'
+    }
+    let dataType = ''
+    for(const dataTypeValue of dataTypes){
+      const dt = this._computeRangeDataType(dataTypeValue)
+
+      if(dataType!=='' && dataType!==dt){
+        return 'Any'
+      }
+      dataType = String(dt)
+    }
+    return dataType
+  }
+
   _getTypeLabelData(){
     const { propertyDataType, avroValue } = this;
     if(avroValue==='map'){
@@ -760,6 +778,17 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     }
     if(propertyDataType==='Unknown type' && avroValue){
       return {dataType:avroValue,customValue:true}
+    }
+    // if(this.isAnyOf){
+    //   const dataTypes = this.range[this.ns.w3.shacl.or]
+    // }
+    if(this.isAllOf){
+      const dataType = this._extractElementsDataType(this.ns.w3.shacl.and)
+      return {dataType,customValue:false}
+    }
+    if(this.isAnyOf){
+      const dataType = this._extractElementsDataType(this.ns.w3.shacl.or)
+      return {dataType,customValue:false}
     }
     return {dataType:propertyDataType,customValue:false}
   }
