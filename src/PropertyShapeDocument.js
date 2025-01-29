@@ -779,9 +779,7 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     if(propertyDataType==='Unknown type' && avroValue){
       return {dataType:avroValue,customValue:true}
     }
-    // if(this.isAnyOf){
-    //   const dataTypes = this.range[this.ns.w3.shacl.or]
-    // }
+    
     if(this.isAllOf){
       const dataType = this._extractElementsDataType(this.ns.w3.shacl.and)
       return {dataType,customValue:false}
