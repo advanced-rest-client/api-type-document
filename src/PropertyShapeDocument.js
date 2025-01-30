@@ -761,12 +761,12 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     }
     let dataType = ''
     for(const dataTypeValue of dataTypes){
-      const dt = this._computeRangeDataType(dataTypeValue)
+      const computeDataType = this._computeRangeDataType(dataTypeValue)
 
-      if(dataType!=='' && dataType!==dt){
+      if(dataType!=='' && dataType!==computeDataType){
         return 'Any'
       }
-      dataType = String(dt)
+      dataType = String(computeDataType)
     }
     return dataType
   }
