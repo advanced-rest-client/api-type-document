@@ -99,6 +99,7 @@ class ApiDemo extends ApiDemoPage {
 
   _apiListTemplate() {
     return [
+      ['shopper-products', 'shopper-products'],
       ['demo-api', 'Demo API'],
       ['avro', 'avro'],
       ['avro2', 'avro2'],
