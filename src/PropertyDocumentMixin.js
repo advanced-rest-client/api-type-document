@@ -124,6 +124,9 @@ const mxFunction = (base) => {
       if (this._hasType(range, rs.UnionShape)) {
         return 'Union';
       }
+      if (this._hasType(range, rs.TupleShape)) {
+        return 'Tuple';
+      }
       if (this._hasType(range, rs.ArrayShape)) {
         return 'Array';
       }
@@ -136,20 +139,14 @@ const mxFunction = (base) => {
       if (this._hasType(range, rs.NilShape)) {
         return 'Null';
       }
-      if (this._hasType(range, rs.AnyShape)) {
-        return 'Any';
-      }
       if (this._hasType(range, rs.MatrixShape)) {
         return 'Matrix';
       }
-      if (this._hasType(range, rs.TupleShape)) {
-        return 'Tuple';
-      }
-      if (this._hasType(range, rs.UnionShape)) {
-        return 'Union';
-      }
       if (this._hasType(range, rs.RecursiveShape)) {
         return 'Recursive';
+      }
+      if (this._hasType(range, rs.AnyShape)) {
+        return 'Any';
       }
       return 'Unknown type';
     }
