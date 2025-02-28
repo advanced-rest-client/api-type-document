@@ -344,7 +344,7 @@ describe('<api-type-document>', () => {
           assert.isUndefined(result);
         });
 
-        it('Computes union type for an array item', async () => {
+        it('Computes union type for an array', async () => {
           const [amf, type] = await AmfLoader.loadType('UnionArray', item[1]);
           element.amf = amf;
           key = element._getAmfKey(element.ns.aml.vocabularies.shapes.anyOf);
@@ -352,7 +352,7 @@ describe('<api-type-document>', () => {
           assert.isTrue(
             element._hasType(
               result,
-              element.ns.aml.vocabularies.shapes.ScalarShape
+              element.ns.aml.vocabularies.shapes.ArrayShape
             )
           );
         });
