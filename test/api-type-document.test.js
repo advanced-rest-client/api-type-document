@@ -349,10 +349,11 @@ describe('<api-type-document>', () => {
           element.amf = amf;
           key = element._getAmfKey(element.ns.aml.vocabularies.shapes.anyOf);
           const result = element._computeProperty(type, key, 0);
+          // Should return ArrayShape to preserve "Array of" indicator in UI
           assert.isTrue(
             element._hasType(
               result,
-              element.ns.aml.vocabularies.shapes.ScalarShape
+              element.ns.aml.vocabularies.shapes.ArrayShape
             )
           );
         });
