@@ -60,17 +60,17 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
    */
   _computedProperties: any[] | undefined;
   /**
-   * Cached deeply resolved type for examples (resolves link-target references)
+   * Resolved type for examples with all link-target references resolved
    */
-  _cachedDeepResolvedType: Object | undefined;
+  _resolvedExampleType: Object | undefined;
   /**
-   * Cached value for whether to render examples
+   * Whether to show the examples section
    */
-  _cachedShouldRenderExamples: boolean | undefined;
+  _showExamples: boolean | undefined;
   /**
-   * Cached example media type
+   * Effective media type for examples
    */
-  _cachedExampleMediaType: string | undefined;
+  _exampleMediaType: string | undefined;
   /**
    * Should be set if described properties has a parent type.
    * This is used when recursively iterating over properties.

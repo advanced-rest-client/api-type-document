@@ -73,17 +73,17 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
        */
       _computedProperties: { type: Array },
       /**
-       * Cached deeply resolved type for examples (resolves link-target references)
+       * Resolved type for examples with all link-target references resolved
        */
-      _cachedDeepResolvedType: { type: Object },
+      _resolvedExampleType: { type: Object },
       /**
-       * Cached value for whether to render examples
+       * Whether to show the examples section
        */
-      _cachedShouldRenderExamples: { type: Boolean },
+      _showExamples: { type: Boolean },
       /**
-       * Cached example media type
+       * Effective media type for examples
        */
-      _cachedExampleMediaType: { type: String },
+      _exampleMediaType: { type: String },
       /**
        * Should be set if described properties has a parent type.
        * This is used when recursively iterating over properties.
@@ -388,15 +388,11 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     
     // If noMainExample changed, recalculate whether to render examples
     if (changedProperties.has('noMainExample') && this._resolvedType) {
-      if (this.noMainExample) {
-        this._cachedShouldRenderExamples = false;
-      } else if (this.renderMediaSelector) {
-        this._cachedShouldRenderExamples = true;
-      } else if (this.isObject) {
-        this._cachedShouldRenderExamples = true;
-      } else {
-        this._cachedShouldRenderExamples = this._renderMainExample;
-      }
+      this._showExamples = !this.noMainExample && (
+        this.renderMediaSelector ||
+        this.isObject ||
+        this._renderMainExample
+      );
     }
   }
 
@@ -521,32 +517,21 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     // Always deep resolve for examples (resolves link-target references for gRPC and similar)
     // This is cheap if there are no link-targets
     if (type) {
-      this._cachedDeepResolvedType = this._deepResolveType(type);
+      this._resolvedExampleType = this._deepResolveType(type);
     } else {
-      this._cachedDeepResolvedType = type;
+      this._resolvedExampleType = type;
     }
     
-    // Cache whether to render examples
-    // We need to show the examples section if:
-    // 1. We need to show the media type selector (renderMediaSelector is true)
-    // 2. OR we have examples to show (_renderMainExample is true)
-    // 3. OR it's an object (can generate examples automatically)
-    // UNLESS noMainExample is explicitly set to true
-    if (this.noMainExample) {
-      this._cachedShouldRenderExamples = false;
-    } else if (this.renderMediaSelector) {
-      // Need to show the section for the media type selector
-      this._cachedShouldRenderExamples = true;
-    } else if (isObject) {
-      // Objects can generate examples automatically
-      this._cachedShouldRenderExamples = true;
-    } else {
-      // For other types, use the computed _renderMainExample value
-      this._cachedShouldRenderExamples = this._renderMainExample;
-    }
+    // Determine if we should show the examples section
+    // Priority: noMainExample (hide) > renderMediaSelector (show) > isObject (show) > _renderMainExample
+    this._showExamples = !this.noMainExample && (
+      this.renderMediaSelector || // Need to show the section for the media type selector
+      isObject ||                 // Objects can generate examples automatically
+      this._renderMainExample     // Has explicit examples
+    );
     
-    // Cache example media type - use 'application/json' as default for objects without mediaType
-    this._cachedExampleMediaType = this.mediaType || (isObject ? 'application/json' : undefined);
+    // Effective media type - use 'application/json' as default for objects without mediaType
+    this._exampleMediaType = this.mediaType || (isObject ? 'application/json' : undefined);
   }
 
   /**
@@ -1143,12 +1128,12 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     parts +=
       'code-content-action-button-active, code-wrapper, example-code-wrapper, markdown-html';
     const mediaTypes = (this.mediaTypes || []);
-    // Use cached values if available
-    const shouldRenderExamples = this._cachedShouldRenderExamples !== undefined 
-      ? this._cachedShouldRenderExamples 
+    // Use cached values if available, otherwise fallback to computed values
+    const shouldRenderExamples = this._showExamples !== undefined 
+      ? this._showExamples 
       : this._renderMainExample;
-    const exampleMediaType = this._cachedExampleMediaType !== undefined
-      ? this._cachedExampleMediaType
+    const exampleMediaType = this._exampleMediaType !== undefined
+      ? this._exampleMediaType
       : (this.mediaType || (this.isObject ? 'application/json' : undefined));
     
     return html`<style>${this.styles}</style>
@@ -1177,7 +1162,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
         <api-resource-example-document
           .amf="${this.amf}"
           .payloadId="${this.selectedBodyId}"
-          .examples="${this._cachedDeepResolvedType || this._resolvedType}"
+          .examples="${this._resolvedExampleType || this._resolvedType}"
           .mediaType="${exampleMediaType}"
           .typeName="${this.parentTypeName}"
           @has-examples-changed="${this._hasExamplesHandler}"

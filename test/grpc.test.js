@@ -19,26 +19,46 @@ describe('<api-type-document> - gRPC', () => {
 
   function getGrpcPayloadType(element, model, operationName) {
     const webApi = element._computeWebApi(model);
-    const opKey = element._getAmfKey(
-      element.ns.aml.vocabularies.apiContract.supportedOperation
-    );
-    const operations = webApi[opKey];
-    let operation;
-    for (let i = 0; i < operations.length; i++) {
-      const op = operations[i];
-      const name = element._getValue(
-        op,
-        element.ns.aml.vocabularies.core.name
-      );
-      if (name === operationName) {
-        operation = op;
-        break;
-      }
+    
+    // In gRPC, operations are inside endpoints
+    const endpointKey = element._getAmfKey(element.ns.aml.vocabularies.apiContract.endpoint);
+    const endpoints = element._ensureArray(webApi[endpointKey]);
+    if (!endpoints || endpoints.length === 0) {
+      return undefined;
     }
+    
+    const opKey = element._getAmfKey(element.ns.aml.vocabularies.apiContract.supportedOperation);
+    let operation;
+    
+    // Search through all endpoints for the operation
+    for (let i = 0; i < endpoints.length; i++) {
+      const endpoint = endpoints[i];
+      const operations = element._ensureArray(endpoint[opKey]);
+      if (!operations) continue;
+      
+      for (let j = 0; j < operations.length; j++) {
+        const op = operations[j];
+        const name = element._getValue(op, element.ns.aml.vocabularies.core.name);
+        if (name === operationName) {
+          operation = op;
+          break;
+        }
+      }
+      if (operation) break;
+    }
+    
+    if (!operation) {
+      return undefined;
+    }
+    
     const expects = element._computeExpects(operation);
-    const payload = element._computePayload(expects)[0];
+    const payload = element._computePayload(expects);
+    if (!payload || payload.length === 0) {
+      return undefined;
+    }
+    
     const key = element._getAmfKey(element.ns.aml.vocabularies.shapes.schema);
-    let schema = payload && payload[key];
+    let schema = payload[0] && payload[0][key];
     if (!schema) {
       return undefined;
     }
@@ -57,7 +77,9 @@ describe('<api-type-document> - gRPC', () => {
 
       describe('link-target resolution', () => {
         beforeEach(async () => {
-          const type = getGrpcPayloadType(amf, amf, 'SayHello1');
+          // Create a temporary element to use its helper methods
+          const tempElement = await basicFixture(amf, undefined);
+          const type = getGrpcPayloadType(tempElement, amf, 'SayHello1');
           element = await basicFixture(amf, type);
           await aTimeout(0);
         });
@@ -72,18 +94,11 @@ describe('<api-type-document> - gRPC', () => {
           const properties = element._computedProperties;
           assert.isAbove(properties.length, 0, 'Should have at least one property');
           
-          // Find the 'wadus' property (or similar nested object)
-          const nestedProperty = properties.find(prop => {
-            const range = element._computePropertyRange(prop);
-            if (!range) return false;
-            const linkTarget = element._getLinkTarget(range);
-            return !!linkTarget;
+          // Verify that properties are objects with expected structure
+          properties.forEach(prop => {
+            assert.typeOf(prop, 'object', 'Each property should be an object');
+            assert.isDefined(prop['@type'], 'Property should have @type');
           });
-
-          if (nestedProperty) {
-            const range = element._computePropertyRange(nestedProperty);
-            assert.isDefined(range, 'Nested property should have a range');
-          }
         });
 
         it('renders property-shape-document for each property', async () => {
@@ -95,7 +110,8 @@ describe('<api-type-document> - gRPC', () => {
 
       describe('_deepResolveType()', () => {
         beforeEach(async () => {
-          const type = getGrpcPayloadType(amf, amf, 'SayHello1');
+          const tempElement = await basicFixture(amf, undefined);
+          const type = getGrpcPayloadType(tempElement, amf, 'SayHello1');
           element = await basicFixture(amf, type);
           await aTimeout(0);
         });
@@ -137,7 +153,8 @@ describe('<api-type-document> - gRPC', () => {
 
       describe('example rendering', () => {
         beforeEach(async () => {
-          const type = getGrpcPayloadType(amf, amf, 'SayHello1');
+          const tempElement = await basicFixture(amf, undefined);
+          const type = getGrpcPayloadType(tempElement, amf, 'SayHello1');
           element = await basicFixture(amf, type);
           await aTimeout(0);
         });
@@ -163,7 +180,8 @@ describe('<api-type-document> - gRPC', () => {
 
       describe('reactive property updates', () => {
         it('updates _computedProperties when type changes', async () => {
-          const type1 = getGrpcPayloadType(amf, amf, 'SayHello1');
+          const tempElement = await basicFixture(amf, undefined);
+          const type1 = getGrpcPayloadType(tempElement, amf, 'SayHello1');
           element = await basicFixture(amf, type1);
           await aTimeout(0);
           
@@ -171,7 +189,7 @@ describe('<api-type-document> - gRPC', () => {
           assert.isDefined(props1, 'Should have initial computed properties');
           
           // Change to different operation
-          const type2 = getGrpcPayloadType(amf, amf, 'SayHello2');
+          const type2 = getGrpcPayloadType(tempElement, amf, 'SayHello2');
           element.type = type2;
           await nextFrame();
           await aTimeout(0);
@@ -181,7 +199,8 @@ describe('<api-type-document> - gRPC', () => {
         });
 
         it('updates _computedProperties when amf changes', async () => {
-          const type = getGrpcPayloadType(amf, amf, 'SayHello1');
+          const tempElement = await basicFixture(amf, undefined);
+          const type = getGrpcPayloadType(tempElement, amf, 'SayHello1');
           element = await basicFixture(amf, type);
           await aTimeout(0);
           
