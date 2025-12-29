@@ -99,7 +99,6 @@ class ApiDemo extends ApiDemoPage {
 
   _apiListTemplate() {
     return [
-      // grpc
       ['grpc-test', 'GRPC test'],
       ['shopper-products', 'shopper-products'],
       ['demo-api', 'Demo API'],
