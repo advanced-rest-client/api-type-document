@@ -1,0 +1,340 @@
+openapi: 3.0.0
+info:
+  title: Nullable Types Test API
+  description: Comprehensive test for nullable rendering optimization
+  version: 1.0.0
+
+paths:
+  /test:
+    post:
+      summary: Test endpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestResponse'
+
+components:
+  schemas:
+    # ============================================
+    # SCALAR NULLABLES (Should show "Type or null")
+    # ============================================
+    ScalarNullables:
+      type: object
+      description: All scalar types with nullable true - should render as "Type or null"
+      properties:
+        nullableString:
+          type: string
+          nullable: true
+          description: Should show "String or null"
+          example: "hello"
+        
+        nullableInteger:
+          type: integer
+          nullable: true
+          description: Should show "Integer or null"
+          example: 42
+        
+        nullableNumber:
+          type: number
+          nullable: true
+          description: Should show "Number or null"
+          example: 3.14
+        
+        nullableBoolean:
+          type: boolean
+          nullable: true
+          description: Should show "Boolean or null"
+          example: true
+        
+        nullableDateTime:
+          type: string
+          format: date-time
+          nullable: true
+          description: Should show "DateTime or null"
+          example: "2026-01-02T10:30:00Z"
+        
+        nullableDate:
+          type: string
+          format: date
+          nullable: true
+          description: Should show "Date or null"
+          example: "2026-01-02"
+        
+        nullableEmail:
+          type: string
+          format: email
+          nullable: true
+          description: Should show "String or null" (with format email)
+          example: "test@example.com"
+        
+        nullableUuid:
+          type: string
+          format: uuid
+          nullable: true
+          description: Should show "String or null" (with format uuid)
+          example: "550e8400-e29b-41d4-a716-446655440000"
+
+    # ============================================
+    # COMPLEX NULLABLES (Should keep Union selector)
+    # ============================================
+    ComplexNullables:
+      type: object
+      description: Complex types with nullable - should render as Union
+      properties:
+        nullableArray:
+          type: array
+          nullable: true
+          description: Should show "Array or null"
+          items:
+            type: string
+          example: ["item1", "item2"]
+        
+        nullableObject:
+          type: object
+          nullable: true
+          description: Should show "Object or null"
+          properties:
+            name:
+              type: string
+              example: "John Doe"
+            age:
+              type: integer
+              example: 30
+          example:
+            name: "Jane Smith"
+            age: 25
+        
+        nullableArrayOfObjects:
+          type: array
+          nullable: true
+          description: Should show "Array or null"
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                example: "uuid-123"
+              value:
+                type: number
+                example: 42.5
+          example:
+            - id: "obj-1"
+              value: 10.5
+            - id: "obj-2"
+              value: 20.3
+
+    # ============================================
+    # REAL UNIONS (Should keep Union selector)
+    # ============================================
+    RealUnions:
+      type: object
+      description: Real unions that are not just nullable
+      properties:
+        stringOrNumber:
+          description: Real union - should show Union selector
+          oneOf:
+            - type: string
+            - type: number
+        
+        multipleTypes:
+          description: Real union with 3+ types - should show Union selector
+          oneOf:
+            - type: string
+            - type: integer
+            - type: boolean
+        
+        objectOrString:
+          description: Real union - should show Union selector
+          anyOf:
+            - type: object
+              properties:
+                data:
+                  type: string
+            - type: string
+
+    # ============================================
+    # NESTED NULLABLES
+    # ============================================
+    NestedNullables:
+      type: object
+      description: Objects with nested nullable properties
+      properties:
+        user:
+          type: object
+          properties:
+            id:
+              type: string
+              description: Required user ID
+            email:
+              type: string
+              nullable: true
+              description: Optional email - should show "String or null"
+            phoneNumber:
+              type: string
+              nullable: true
+              description: Optional phone - should show "String or null"
+            metadata:
+              type: object
+              nullable: true
+              description: Optional metadata object - should show Union
+              properties:
+                created:
+                  type: string
+                  format: date-time
+                lastLogin:
+                  type: string
+                  format: date-time
+                  nullable: true
+          required:
+            - id
+
+    # ============================================
+    # ARRAYS WITH NULLABLE ITEMS
+    # ============================================
+    ArraysWithNullableItems:
+      type: object
+      description: Arrays containing nullable items
+      properties:
+        arrayOfNullableStrings:
+          type: array
+          description: Array of strings where each item can be null
+          items:
+            type: string
+            nullable: true
+        
+        arrayOfNullableObjects:
+          type: array
+          description: Array of objects where each object can be null
+          items:
+            type: object
+            nullable: true
+            properties:
+              name:
+                type: string
+              value:
+                type: number
+
+    # ============================================
+    # EDGE CASES
+    # ============================================
+    EdgeCases:
+      type: object
+      description: Edge cases and special scenarios
+      properties:
+        enumNullable:
+          type: string
+          enum: ["option1", "option2", "option3"]
+          nullable: true
+          description: Enum with nullable - should show "String or null"
+        
+        numberWithConstraints:
+          type: number
+          minimum: 0
+          maximum: 100
+          nullable: true
+          description: Number with constraints and nullable - should show "Number or null"
+        
+        stringWithPattern:
+          type: string
+          pattern: "^[A-Z]{3}$"
+          nullable: true
+          description: String with pattern and nullable - should show "String or null"
+        
+        readOnlyNullable:
+          type: string
+          nullable: true
+          readOnly: true
+          description: Read-only nullable field - should show "String or null"
+        
+        deprecatedNullable:
+          type: integer
+          nullable: true
+          deprecated: true
+          description: Deprecated nullable field - should show "Integer or null"
+
+    # ============================================
+    # COMBINED REQUEST/RESPONSE
+    # ============================================
+    TestRequest:
+      type: object
+      required:
+        - userId
+        - action
+      properties:
+        userId:
+          type: string
+          description: Required user ID
+        action:
+          type: string
+          enum: ["create", "update", "delete"]
+        timezone:
+          type: string
+          nullable: true
+          description: Client timezone (nullable) - should show "String or null"
+          example: "America/Los_Angeles"
+        metadata:
+          type: object
+          nullable: true
+          description: Optional metadata (nullable object) - should show "Object or null"
+          properties:
+            source:
+              type: string
+              example: "web-app"
+            timestamp:
+              type: string
+              format: date-time
+              example: "2026-01-02T10:30:00Z"
+        tags:
+          type: array
+          nullable: true
+          description: Optional tags (nullable array) - should show "Array or null"
+          items:
+            type: string
+      example:
+        userId: "user-123"
+        action: "create"
+        timezone: "America/Los_Angeles"
+        metadata:
+          source: "mobile-app"
+          timestamp: "2026-01-02T15:45:30Z"
+        tags: ["tag1", "tag2", "tag3"]
+
+    TestResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          nullable: true
+          description: Response data (nullable object) - should show "Object or null"
+          properties:
+            id:
+              type: string
+            status:
+              type: string
+        message:
+          type: string
+          nullable: true
+          description: Optional message - should show "String or null"
+        errorCode:
+          type: integer
+          nullable: true
+          description: Optional error code - should show "Integer or null"
+      example:
+        success: true
+        data:
+          id: "result-456"
+          status: "completed"
+        message: "Operation successful"
+        errorCode: null
+

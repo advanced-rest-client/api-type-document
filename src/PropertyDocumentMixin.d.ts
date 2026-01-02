@@ -50,6 +50,15 @@ interface PropertyDocumentMixin extends AmfHelperMixin {
   graph: boolean;
 
   /**
+   * Checks if a union shape represents a nullable type (union with null).
+   * A nullable type is a union of exactly 2 members where one is NilShape.
+   * 
+   * @param range AMF range object (should be UnionShape)
+   * @returns Returns {baseType, isNullable: true} if nullable, undefined otherwise
+   */
+  _checkNullableUnion(range: any): { baseType: any; isNullable: boolean } | undefined;
+
+  /**
    * Computes type from a `http://raml.org/vocabularies/shapes#range` object
    *
    * @param range AMF property range object

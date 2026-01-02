@@ -893,13 +893,19 @@ describe('<api-type-document>', () => {
           element = await basicFixture();
         });
 
-        it('should render union toggle as "Array of String"', async () => {
+        it('should render nullable array as "Array or null"', async () => {
           const data = await AmfLoader.loadType('test2', compact, 'APIC-631');
           element.amf = data[0];
-          element._typeChanged(element._resolve(data[1]));
-          await nextFrame();
-          const firstToggle = element.shadowRoot.querySelectorAll('.union-toggle')[0]
-          assert.equal(firstToggle.textContent.toLowerCase(), 'array of string');
+          element.type = data[1];
+          await aTimeout(100);
+          // test2 is string[] | nil which should now render as scalar with "Array or null"
+          const shapeDoc = element.shadowRoot.querySelector('property-shape-document');
+          assert.exists(shapeDoc, 'Should have property-shape-document');
+          const dataType = shapeDoc.shadowRoot.querySelector('.data-type');
+          assert.exists(dataType, 'Should have data-type element');
+          // Should show "Array or null" instead of Union selector
+          assert.include(dataType.textContent.toLowerCase(), 'array');
+          assert.include(dataType.textContent.toLowerCase(), 'null');
         });
 
         it('should not render type name as "undefined" for inline type', async () => {
