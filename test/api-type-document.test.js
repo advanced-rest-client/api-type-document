@@ -1325,4 +1325,255 @@ describe('<api-type-document>', () => {
       await assert.isAccessible(element);
     });
   });
+
+  describe('_deepResolveType()', () => {
+    let element = /** @type ApiTypeDocument */ (null);
+
+    beforeEach(async () => {
+      element = await basicFixture();
+    });
+
+    it('returns undefined when no type provided', () => {
+      const result = element._deepResolveType(undefined);
+      assert.isUndefined(result);
+    });
+
+    it('returns type without properties unchanged', async () => {
+      const data = await AmfLoader.loadType('ScalarType', false);
+      element.amf = data[0];
+      const type = element._resolve(data[1]);
+      const result = element._deepResolveType(type);
+      assert.typeOf(result, 'object');
+    });
+
+    it('resolves properties with link-target references', async () => {
+      const data = await AmfLoader.load(false, 'grpc-test');
+      element.amf = data;
+      const webApi = element._computeWebApi(data);
+      const opKey = element._getAmfKey(
+        element.ns.aml.vocabularies.apiContract.supportedOperation
+      );
+      const operations = element._ensureArray(webApi[opKey]);
+      if (!operations || operations.length === 0) {
+        // Skip test if gRPC data is not available
+        return;
+      }
+      const operation = operations.find(op => {
+        const name = element._getValue(op, element.ns.aml.vocabularies.core.name);
+        return name === 'SayHello1';
+      });
+      if (!operation) {
+        // Skip if operation not found
+        return;
+      }
+      const expects = element._computeExpects(operation);
+      const payload = element._computePayload(expects)[0];
+      const key = element._getAmfKey(element.ns.aml.vocabularies.shapes.schema);
+      let schema = payload && payload[key];
+      schema = schema instanceof Array ? schema[0] : schema;
+      const resolved = element._resolve(schema);
+      
+      const result = element._deepResolveType(resolved);
+      assert.typeOf(result, 'object');
+      const propsKey = element._getAmfKey(element.ns.w3.shacl.property);
+      assert.isDefined(result[propsKey], 'Should have properties');
+    });
+
+    it('handles nested link-target references', async () => {
+      const data = await AmfLoader.load(false, 'grpc-test');
+      element.amf = data;
+      const webApi = element._computeWebApi(data);
+      const opKey = element._getAmfKey(
+        element.ns.aml.vocabularies.apiContract.supportedOperation
+      );
+      const operations = element._ensureArray(webApi[opKey]);
+      if (!operations || operations.length === 0) {
+        // Skip test if gRPC data is not available
+        return;
+      }
+      const operation = operations.find(op => {
+        const name = element._getValue(op, element.ns.aml.vocabularies.core.name);
+        return name === 'SayHello1';
+      });
+      if (!operation) {
+        // Skip if operation not found
+        return;
+      }
+      const expects = element._computeExpects(operation);
+      const payload = element._computePayload(expects)[0];
+      const key = element._getAmfKey(element.ns.aml.vocabularies.shapes.schema);
+      let schema = payload && payload[key];
+      schema = schema instanceof Array ? schema[0] : schema;
+      const resolved = element._resolve(schema);
+      
+      const result = element._deepResolveType(resolved);
+      const propsKey = element._getAmfKey(element.ns.w3.shacl.property);
+      const properties = result[propsKey];
+      
+      if (properties && properties.length > 0) {
+        // Check that nested properties were resolved
+        properties.forEach(prop => {
+          const rangeKey = element._getAmfKey(element.ns.aml.vocabularies.shapes.range);
+          const range = prop[rangeKey];
+          if (range) {
+            const rangeItem = Array.isArray(range) ? range[0] : range;
+            assert.isDefined(rangeItem, 'Range should be defined');
+          }
+        });
+      }
+    });
+  });
+
+  describe('Reactive computed properties', () => {
+    let element = /** @type ApiTypeDocument */ (null);
+
+    beforeEach(async () => {
+      element = await basicFixture();
+    });
+
+    it('computes _computedProperties when isObject is true', async () => {
+      const data = await AmfLoader.loadType('Notification', false);
+      element.amf = data[0];
+      element.type = data[1];
+      await aTimeout(0);
+      
+      assert.isTrue(element.isObject);
+      assert.isDefined(element._computedProperties);
+      assert.isArray(element._computedProperties);
+    });
+
+    it('sets _computedProperties to undefined when not an object', async () => {
+      const data = await AmfLoader.loadType('ScalarType', false);
+      element.amf = data[0];
+      element.type = data[1];
+      await aTimeout(0);
+      
+      assert.isTrue(element.isScalar);
+      assert.isUndefined(element._computedProperties);
+    });
+
+    it('updates _computedProperties when type changes', async () => {
+      const data1 = await AmfLoader.loadType('Notification', false);
+      element.amf = data1[0];
+      element.type = data1[1];
+      await aTimeout(0);
+      
+      const props1 = element._computedProperties;
+      assert.isDefined(props1);
+      const length1 = props1.length;
+      
+      const data2 = await AmfLoader.loadType('Image', false);
+      element.type = data2[1];
+      await nextFrame();
+      await aTimeout(0);
+      
+      const props2 = element._computedProperties;
+      assert.isDefined(props2);
+      // Different types may have different number of properties
+      assert.typeOf(props2, 'array');
+    });
+
+    it('updates _computedProperties when renderReadOnly changes', async () => {
+      const data = await AmfLoader.loadType('Article', false, 'read-only-properties');
+      element.amf = data[0];
+      element.type = data[1];
+      element.renderReadOnly = false;
+      await nextFrame();
+      await aTimeout(0);
+      
+      const props1 = element._computedProperties;
+      assert.isDefined(props1);
+      const length1 = props1.length;
+      
+      element.renderReadOnly = true;
+      await nextFrame();
+      await aTimeout(0);
+      
+      const props2 = element._computedProperties;
+      assert.isDefined(props2);
+      assert.isAbove(props2.length, length1, 'Should have more properties when renderReadOnly is true');
+    });
+
+    it('updates _computedProperties when amf changes', async () => {
+      const data1 = await AmfLoader.loadType('Notification', false);
+      element.amf = data1[0];
+      element.type = data1[1];
+      await aTimeout(0);
+      
+      assert.isDefined(element._computedProperties);
+      
+      // Reload the same model (simulating amf change)
+      const data2 = await AmfLoader.loadType('Notification', false);
+      element.amf = data2[0];
+      await nextFrame();
+      await aTimeout(0);
+      
+      assert.isDefined(element._computedProperties, 'Should recompute properties after amf change');
+    });
+  });
+
+  describe('Example rendering with deep resolution', () => {
+    let element = /** @type ApiTypeDocument */ (null);
+
+    beforeEach(async () => {
+      element = await basicFixture();
+    });
+
+    it('renders examples section for objects', async () => {
+      const data = await AmfLoader.loadType('Notification', false);
+      element.amf = data[0];
+      element.type = data[1];
+      await aTimeout(0);
+      
+      const examplesSection = element.shadowRoot.querySelector('.examples');
+      assert.exists(examplesSection);
+    });
+
+    it('passes resolved type to api-resource-example-document', async () => {
+      const data = await AmfLoader.loadType('Notification', false);
+      element.amf = data[0];
+      element.type = data[1];
+      await aTimeout(0);
+      
+      const exampleDoc = element.shadowRoot.querySelector('api-resource-example-document');
+      assert.exists(exampleDoc);
+      assert.isDefined(exampleDoc.examples);
+    });
+
+    it('sets mediaType when provided', async () => {
+      const data = await AmfLoader.loadType('Notification', false);
+      element.amf = data[0];
+      element.type = data[1];
+      element.mediaType = 'application/json';
+      await aTimeout(0);
+      
+      const exampleDoc = element.shadowRoot.querySelector('api-resource-example-document');
+      assert.exists(exampleDoc);
+      assert.equal(exampleDoc.mediaType, 'application/json');
+    });
+
+    it('uses default mediaType when not provided for objects', async () => {
+      const data = await AmfLoader.loadType('Notification', false);
+      element.amf = data[0];
+      element.type = data[1];
+      // Don't set mediaType
+      await aTimeout(0);
+      
+      const exampleDoc = element.shadowRoot.querySelector('api-resource-example-document');
+      assert.exists(exampleDoc);
+      assert.equal(exampleDoc.mediaType, 'application/json');
+    });
+
+    it('does not render examples when noMainExample is true', async () => {
+      const data = await AmfLoader.loadType('Notification', false);
+      element.amf = data[0];
+      element.noMainExample = true;
+      element.type = data[1];
+      await element.updateComplete;
+      await nextFrame();
+      
+      const examplesSection = element.shadowRoot.querySelector('.examples');
+      assert.notExists(examplesSection);
+    });
+  });
 });

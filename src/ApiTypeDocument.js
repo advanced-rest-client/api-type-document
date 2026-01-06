@@ -69,6 +69,22 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       // The type after it has been resolved.
       _resolvedType: { type: Object },
       /**
+       * Computed properties from the resolved type
+       */
+      _computedProperties: { type: Array },
+      /**
+       * Resolved type for examples with all link-target references resolved
+       */
+      _resolvedExampleType: { type: Object },
+      /**
+       * Whether to show the examples section
+       */
+      _showExamples: { type: Boolean },
+      /**
+       * Effective media type for examples
+       */
+      _exampleMediaType: { type: String },
+      /**
        * Should be set if described properties has a parent type.
        * This is used when recursively iterating over properties.
        */
@@ -325,6 +341,10 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
      */
     this.selectedAnyOf = undefined;
     this.renderReadOnly = false;
+    this.noMainExample = false;
+    this._hasExamples = false;
+    this._renderMainExample = false;
+    this._cachedDeepResolvedType = undefined;
 
     this._isPropertyReadOnly = this._isPropertyReadOnly.bind(this);
     this.noMediaSelector = false;
@@ -343,6 +363,37 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
 
   _computeRenderMainExample(noMainExample, hasExamples, isScalar = false) {
     return isScalar ? false : !!(!noMainExample && hasExamples);
+  }
+
+  /**
+   * Called when properties change
+   * @param {Map} changedProperties Changed properties
+   */
+  updated(changedProperties) {
+    super.updated(changedProperties);
+    
+    // If amf changed and we have a type, recalculate properties synchronously
+    if (changedProperties.has('amf') && this._resolvedType && this.amf) {
+      // Cancel any pending debounced calls and recalculate
+      this.__typeChangeDebouncer = false;
+      this._typeChanged(this._resolvedType);
+      // _typeChanged will update _computedProperties, _isGrpcApi, and _deepResolvedType
+    }
+    
+    // If renderReadOnly changed and we have an object, recalculate properties
+    // This is needed because _filterReadOnlyProperties depends on this.renderReadOnly
+    if (changedProperties.has('renderReadOnly') && this._resolvedType && this.isObject) {
+      this._computedProperties = this._computeProperties(this._resolvedType);
+    }
+    
+    // If noMainExample changed, recalculate whether to render examples
+    if (changedProperties.has('noMainExample') && this._resolvedType) {
+      this._showExamples = !this.noMainExample && (
+        this.renderMediaSelector ||
+        this.isObject ||
+        this._renderMainExample
+      );
+    }
   }
 
   /**
@@ -455,6 +506,32 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     this.isAnd = isAnd;
     this.isOneOf = isOneOf;
     this.isAnyOf = isAnyOf;
+    
+    // Compute properties for objects - this needs to be reactive
+    if (isObject) {
+      this._computedProperties = this._computeProperties(type);
+    } else {
+      this._computedProperties = undefined;
+    }
+    
+    // Always deep resolve for examples (resolves link-target references for gRPC and similar)
+    // This is cheap if there are no link-targets
+    if (type) {
+      this._resolvedExampleType = this._deepResolveType(type);
+    } else {
+      this._resolvedExampleType = type;
+    }
+    
+    // Determine if we should show the examples section
+    // Priority: noMainExample (hide) > renderMediaSelector (show) > isObject (show) > _renderMainExample
+    this._showExamples = !this.noMainExample && (
+      this.renderMediaSelector || // Need to show the section for the media type selector
+      isObject ||                 // Objects can generate examples automatically
+      this._renderMainExample     // Has explicit examples
+    );
+    
+    // Effective media type - use 'application/json' as default for objects without mediaType
+    this._exampleMediaType = this.mediaType || (isObject ? 'application/json' : undefined);
   }
 
   /**
@@ -539,6 +616,91 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     return this._resolve(item);
   }
 
+
+  /**
+   * Deeply resolves link-target references in a type for example generation.
+   * This ensures that nested objects show their full structure in examples.
+   * This is needed for APIs like gRPC where nested types use link-target references.
+   * 
+   * @param {Object} type The type to resolve
+   * @return {Object} The deeply resolved type
+   */
+  _deepResolveType(type) {
+    if (!type || !this.amf) {
+      return type;
+    }
+
+    const resolved = this._resolve(type);
+    if (!resolved) {
+      return type;
+    }
+
+    // Get properties
+    const propertyKey = this._getAmfKey(this.ns.w3.shacl.property);
+    const properties = this._ensureArray(resolved[propertyKey]);
+    
+    if (!properties || !properties.length) {
+      return resolved;
+    }
+
+    // Create a new type object with deeply resolved properties
+    const deepResolved = { ...resolved };
+    const linkTargetKey = this._getAmfKey(this.ns.aml.vocabularies.document.linkTarget);
+    const rangeKey = this._getAmfKey(this.ns.raml.vocabularies.shapes.range);
+    
+    // Resolve each property's range
+    const resolvedProperties = properties.map(prop => {
+      const resolvedProp = this._resolve(prop);
+      if (!resolvedProp) {
+        return prop;
+      }
+
+      const range = this._ensureArray(resolvedProp[rangeKey])[0];
+      if (!range) {
+        return resolvedProp;
+      }
+
+      // If the range has a link-target, resolve it
+      if (range[linkTargetKey]) {
+        const linkTargetId = this._ensureArray(range[linkTargetKey])[0];
+        if (linkTargetId && linkTargetId['@id']) {
+          const targetId = linkTargetId['@id'];
+          
+          // Find the target
+          const declares = this._computeDeclares(this.amf);
+          let target = declares ? this._findById(declares, targetId) : undefined;
+          
+          if (!target) {
+            const references = this._computeReferences(this.amf);
+            if (references && references.length) {
+              for (let i = 0; i < references.length && !target; i++) {
+                const refDeclares = this._computeDeclares(references[i]);
+                if (refDeclares) {
+                  target = this._findById(refDeclares, targetId);
+                }
+              }
+            }
+          }
+
+          // If target found, replace the range with the resolved target
+          if (target) {
+            const resolvedTarget = this._resolve(target);
+            if (resolvedTarget) {
+              const newProp = { ...resolvedProp };
+              newProp[rangeKey] = [resolvedTarget];
+              return newProp;
+            }
+          }
+        }
+      }
+
+      return resolvedProp;
+    });
+
+    deepResolved[propertyKey] = resolvedProperties;
+    return deepResolved;
+  }
+
   /**
    * Helper function for the view. Extracts `http://www.w3.org/ns/shacl#property`
    * from the shape model
@@ -554,16 +716,65 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       return item;
     }
     
+    // For objects with link-target, we need to find the actual target with properties
+    const linkTargetKey = this._getAmfKey(this.ns.aml.vocabularies.document.linkTarget);
+    let resolvedItem = item;
+    
+    if (item[linkTargetKey] && this.amf) {
+      const linkTargetId = this._ensureArray(item[linkTargetKey])[0];
+      if (linkTargetId && linkTargetId['@id']) {
+        const targetId = linkTargetId['@id'];
+        // Try to find the target in declares
+        const declares = this._computeDeclares(this.amf);
+        let target = declares ? this._findById(declares, targetId) : undefined;
+        
+        // If not found in declares, search in references
+        if (!target) {
+          const references = this._computeReferences(this.amf);
+          if (references && references.length) {
+            for (let i = 0; i < references.length && !target; i++) {
+              const refDeclares = this._computeDeclares(references[i]);
+              if (refDeclares) {
+                target = this._findById(refDeclares, targetId);
+              }
+            }
+          }
+        }
+        
+        // If we found the target and it has properties, use it
+        // Don't use the target directly to avoid caching issues
+        const propertyKey = this._getAmfKey(this.ns.w3.shacl.property);
+        if (target && target[propertyKey]) {
+          // Use the target's properties but keep the original item structure
+          // This prevents issues with cached __apicResolved flags
+          resolvedItem = this._resolve(target);
+          // If resolve returned the same object or failed, fallback to standard resolve
+          if (!resolvedItem || !resolvedItem[propertyKey]) {
+            resolvedItem = this._resolve(item);
+          }
+        }
+      }
+    }
+    
+    // Fallback to standard resolve if no link-target or target not found
+    if (resolvedItem === item) {
+      resolvedItem = this._resolve(item);
+    }
+    
+    if (!resolvedItem) {
+      return undefined;
+    }
+    
     const propertyKey = this._getAmfKey(this.ns.w3.shacl.property);
-    const itemProperties = this._ensureArray(item[propertyKey]||[])
+    const itemProperties = this._ensureArray(resolvedItem[propertyKey]||[])
     const additionalPropertiesKey = this._getAmfKey(this.ns.w3.shacl.additionalPropertiesSchema);
 
     // If the item doesn't have additional properties, filter the read-only properties and return
-    if (!item[additionalPropertiesKey]) {
+    if (!resolvedItem[additionalPropertiesKey]) {
       return this._filterReadOnlyProperties(itemProperties)
     }
 
-    const additionalPropertiesSchema = this._ensureArray(item[additionalPropertiesKey])
+    const additionalPropertiesSchema = this._ensureArray(resolvedItem[additionalPropertiesKey])
     
     // If the item does have additional properties, ensure they are in an array
     const additionalProperties = this._ensureArray(additionalPropertiesSchema[0][propertyKey] || additionalPropertiesSchema[0])
@@ -681,7 +892,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
    * @return {TemplateResult[]|string} Templates for object properties
    */
   _objectTemplate() {
-    const items = this._computeProperties(this._resolvedType);
+    const items = this._computedProperties;
     if (!items || !items.length) {
       return '';
     }
@@ -917,8 +1128,16 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     parts +=
       'code-content-action-button-active, code-wrapper, example-code-wrapper, markdown-html';
     const mediaTypes = (this.mediaTypes || []);
+    // Use cached values if available, otherwise fallback to computed values
+    const shouldRenderExamples = this._showExamples !== undefined 
+      ? this._showExamples 
+      : this._renderMainExample;
+    const exampleMediaType = this._exampleMediaType !== undefined
+      ? this._exampleMediaType
+      : (this.mediaType || (this.isObject ? 'application/json' : undefined));
+    
     return html`<style>${this.styles}</style>
-      <section class="examples" ?hidden="${!this._renderMainExample}">
+      ${shouldRenderExamples ? html`<section class="examples">
         ${this.shouldRenderMediaSelector
         ? html`<div class="media-type-selector">
               <span>Media type:</span>
@@ -943,18 +1162,18 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
         <api-resource-example-document
           .amf="${this.amf}"
           .payloadId="${this.selectedBodyId}"
-          .examples="${this._resolvedType}"
-          .mediaType="${this.mediaType}"
+          .examples="${this._resolvedExampleType || this._resolvedType}"
+          .mediaType="${exampleMediaType}"
           .typeName="${this.parentTypeName}"
           @has-examples-changed="${this._hasExamplesHandler}"
           ?noauto="${!!this.isScalar}"
           ?noactions="${this.noExamplesActions}"
-          ?rawOnly="${!this.mediaType}"
+          ?rawOnly="${!exampleMediaType}"
           ?compatibility="${this.compatibility}"
           exportParts="${parts}"
           ?renderReadOnly="${this.renderReadOnly}"
         ></api-resource-example-document>
-      </section>
+      </section>` : ''}
 
       ${this.isObject ? this._objectTemplate() : ''}
       ${this.isArray ? this._arrayTemplate() : ''}

@@ -55,6 +55,23 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
   // The type after it has been resolved.
   _resolvedType: Object;
   /**
+   * Computed properties for object types.
+   * This is a reactive property that is recalculated when type, amf, or renderReadOnly changes.
+   */
+  _computedProperties: any[] | undefined;
+  /**
+   * Resolved type for examples with all link-target references resolved
+   */
+  _resolvedExampleType: Object | undefined;
+  /**
+   * Whether to show the examples section
+   */
+  _showExamples: boolean | undefined;
+  /**
+   * Effective media type for examples
+   */
+  _exampleMediaType: string | undefined;
+  /**
    * Should be set if described properties has a parent type.
    * This is used when recursively iterating over properties.
    * @attribute
@@ -241,6 +258,15 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
    * @returns Shape object
    */
   _computeProperties(item: any): any[]|undefined;
+
+  /**
+   * Deeply resolves link-target references in a type and its nested properties.
+   * This is essential for rendering complete examples with nested objects.
+   *
+   * @param type The type to resolve
+   * @returns The type with all link-target references resolved
+   */
+  _deepResolveType(type: any): any|undefined;
 
   /**
    * Computes list values for `andTypes` property.
