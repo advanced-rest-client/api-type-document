@@ -63,6 +63,7 @@ dist/
 !demo/apis.json
 !demo/avro.json
 !demo/avro2.json
+!demo/grpc-test.json
 
 .idea/
 .codegenie/

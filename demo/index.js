@@ -101,6 +101,7 @@ class ApiDemo extends ApiDemoPage {
     return [
       ['nullable-test', 'Nullable Test (Comprehensive)'],
       ['nulleable', 'Nulleable test'],
+      ['grpc-test', 'GRPC test'],
       ['shopper-products', 'shopper-products'],
       ['demo-api', 'Demo API'],
       ['avro', 'avro'],
