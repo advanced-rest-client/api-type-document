@@ -178,10 +178,11 @@ describe('PropertyShapeDocument', () => {
           assert.isFalse(element.isEnum);
         });
 
-        it('sets isUnion to true when is union', async () => {
+        it('sets isUnion to false when is nullable (not a real union)', async () => {
           const shape = getPropertyShape(element, type, 'nillable');
           element.shape = shape;
-          assert.isTrue(element.isUnion);
+          // nillable is string | nil, which is now treated as nullable, not union
+          assert.isFalse(element.isUnion);
         });
 
         it('sets isUnion to false when is not union', async () => {
@@ -221,10 +222,11 @@ describe('PropertyShapeDocument', () => {
           assert.isTrue(element.isComplex);
         });
 
-        it('sets isComplex to true when is union', async () => {
+        it('sets isComplex to false when is nullable scalar (not complex)', async () => {
           const shape = getPropertyShape(element, type, 'nillable');
           element.shape = shape;
-          assert.isTrue(element.isComplex);
+          // nillable is string | nil, which is now treated as scalar nullable (not complex)
+          assert.isFalse(element.isComplex);
         });
 
         it('sets isComplex to true when array property', async () => {
@@ -308,7 +310,7 @@ describe('PropertyShapeDocument', () => {
           ['fietype', 'File'],
           ['etag', 'String'],
           ['age', 'Integer'],
-          ['nillable', 'Union'],
+          ['nillable', 'String or null'],
           ['birthday', 'Date'],
         ].forEach(([property, dataType]) => {
           it(`sets propertyDataType to ${dataType}`, () => {

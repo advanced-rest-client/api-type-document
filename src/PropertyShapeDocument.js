@@ -735,7 +735,14 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     if (!this.isComplex || !this.opened || this.isScalarArray) {
       return '';
     }
-    const range = this._resolve(this.range);
+    let range = this._resolve(this.range);
+    
+    // If this is a nullable complex type, extract the base type
+    const nullableCheck = this._checkNullableUnion(range);
+    if (nullableCheck) {
+      range = nullableCheck.baseType;
+    }
+    
     const parentTypeName = this._getParentTypeName();
     return html`<api-type-document
       class="children complex"

@@ -108,6 +108,65 @@ const mxFunction = (base) => {
     }
 
     /**
+     * Checks if a union shape represents a nullable type (union with null).
+     * A nullable type is a union of exactly 2 members where one is NilShape
+     * and the other is any type (scalar, array, object, etc.).
+     * 
+     * This is specifically for OpenAPI 3.0 nullable: true which AMF converts
+     * to union of type + null. This simplifies the rendering to "Type or null"
+     * instead of showing a full union selector.
+     * 
+     * @param {any} range AMF range object (should be UnionShape)
+     * @return {Object|undefined} Returns {baseType, isNullable: true} if nullable, undefined otherwise
+     */
+    _checkNullableUnion(range) {
+      if (!range || !this._hasType(range, this.ns.aml.vocabularies.shapes.UnionShape)) {
+        return undefined;
+      }
+      
+      const key = this._getAmfKey(this.ns.aml.vocabularies.shapes.anyOf);
+      const unionMembers = this._ensureArray(range[key]);
+      
+      if (!unionMembers || unionMembers.length !== 2) {
+        return undefined;
+      }
+      
+      // Check if one member is NilShape
+      let nilIndex = -1;
+      let baseTypeIndex = -1;
+      
+      for (let i = 0; i < unionMembers.length; i++) {
+        let member = unionMembers[i];
+        if (Array.isArray(member)) {
+          [member] = member;
+        }
+        member = this._resolve(member);
+        
+        if (this._hasType(member, this.ns.aml.vocabularies.shapes.NilShape)) {
+          nilIndex = i;
+        } else {
+          baseTypeIndex = i;
+        }
+      }
+      
+      // If we found exactly one nil and one non-nil type, it's a nullable
+      if (nilIndex !== -1 && baseTypeIndex !== -1) {
+        let baseType = unionMembers[baseTypeIndex];
+        if (Array.isArray(baseType)) {
+          [baseType] = baseType;
+        }
+        baseType = this._resolve(baseType);
+        
+        return {
+          baseType,
+          isNullable: true
+        };
+      }
+      
+      return undefined;
+    }
+
+    /**
      * Computes type from a `http://raml.org/vocabularies/shapes#range` object
      *
      * @param {any} range AMF property range object
@@ -122,6 +181,12 @@ const mxFunction = (base) => {
         return this._computeScalarDataType(range);
       }
       if (this._hasType(range, rs.UnionShape)) {
+        // Check if this is a nullable union (type | null)
+        const nullableCheck = this._checkNullableUnion(range);
+        if (nullableCheck && nullableCheck.isNullable) {
+          const baseTypeName = this._computeRangeDataType(nullableCheck.baseType);
+          return `${baseTypeName} or null`;
+        }
         return 'Union';
       }
       if (this._hasType(range, rs.ArrayShape)) {
@@ -144,9 +209,6 @@ const mxFunction = (base) => {
       }
       if (this._hasType(range, rs.TupleShape)) {
         return 'Tuple';
-      }
-      if (this._hasType(range, rs.UnionShape)) {
-        return 'Union';
       }
       if (this._hasType(range, rs.RecursiveShape)) {
         return 'Recursive';
@@ -313,7 +375,12 @@ const mxFunction = (base) => {
      * @return {Boolean}
      */
     _computeIsUnion(range) {
-      return this._hasType(range, this.ns.aml.vocabularies.shapes.UnionShape);
+      if (!this._hasType(range, this.ns.aml.vocabularies.shapes.UnionShape)) {
+        return false;
+      }
+      // Check if it's a nullable union (which we don't treat as union for UI)
+      const nullableCheck = this._checkNullableUnion(range);
+      return !nullableCheck; // Only true if NOT nullable
     }
 
     /**
@@ -325,7 +392,15 @@ const mxFunction = (base) => {
      * @return {Boolean}
      */
     _computeIsObject(range) {
-      return this._hasType(range, this.ns.w3.shacl.NodeShape);
+      if (this._hasType(range, this.ns.w3.shacl.NodeShape)) {
+        return true;
+      }
+      // Check if it's a nullable object
+      const nullableCheck = this._checkNullableUnion(range);
+      if (nullableCheck) {
+        return this._hasType(nullableCheck.baseType, this.ns.w3.shacl.NodeShape);
+      }
+      return false;
     }
 
     /**
@@ -337,7 +412,15 @@ const mxFunction = (base) => {
      * @return {Boolean}
      */
     _computeIsArray(range) {
-      return this._hasType(range, this.ns.aml.vocabularies.shapes.ArrayShape);
+      if (this._hasType(range, this.ns.aml.vocabularies.shapes.ArrayShape)) {
+        return true;
+      }
+      // Check if it's a nullable array
+      const nullableCheck = this._checkNullableUnion(range);
+      if (nullableCheck) {
+        return this._hasType(nullableCheck.baseType, this.ns.aml.vocabularies.shapes.ArrayShape);
+      }
+      return false;
     }
 
     /**

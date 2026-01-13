@@ -99,6 +99,8 @@ class ApiDemo extends ApiDemoPage {
 
   _apiListTemplate() {
     return [
+      ['nullable-test', 'Nullable Test (Comprehensive)'],
+      ['nulleable', 'Nulleable test'],
       ['grpc-test', 'GRPC test'],
       ['shopper-products', 'shopper-products'],
       ['demo-api', 'Demo API'],

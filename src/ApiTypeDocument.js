@@ -448,9 +448,16 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     } else if (
       this._hasType(type, shapesKey.UnionShape)
     ) {
-      isUnion = true;
-      key = this._getAmfKey(shapesKey.anyOf);
-      this.unionTypes = this._computeTypes(type, key);
+      // Check if this is a nullable union (type | null) which should be rendered as scalar
+      const nullableCheck = this._checkNullableUnion(type);
+      if (nullableCheck && nullableCheck.isNullable) {
+        // Treat nullable types as scalar for cleaner rendering
+        isScalar = true;
+      } else {
+        isUnion = true;
+        key = this._getAmfKey(shapesKey.anyOf);
+        this.unionTypes = this._computeTypes(type, key);
+      }
     } else if (this._hasProperty(type, this.ns.w3.shacl.xone)) {
       isOneOf = true;
       key = this._getAmfKey(this.ns.w3.shacl.xone);
