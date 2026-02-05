@@ -99,6 +99,7 @@ class ApiDemo extends ApiDemoPage {
 
   _apiListTemplate() {
     return [
+      ['nested-examples-oas3', 'Nested Examples'],
       ['nullable-test', 'Nullable Test (Comprehensive)'],
       ['nulleable', 'Nulleable test'],
       ['grpc-test', 'GRPC test'],

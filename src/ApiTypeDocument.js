@@ -391,6 +391,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       this._showExamples = !this.noMainExample && (
         this.renderMediaSelector ||
         this.isObject ||
+        this.isArray ||
         this._renderMainExample
       );
     }
@@ -530,15 +531,16 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     }
     
     // Determine if we should show the examples section
-    // Priority: noMainExample (hide) > renderMediaSelector (show) > isObject (show) > _renderMainExample
+    // Priority: noMainExample (hide) > renderMediaSelector (show) > isObject (show) > isArray (show) > _renderMainExample
     this._showExamples = !this.noMainExample && (
       this.renderMediaSelector || // Need to show the section for the media type selector
       isObject ||                 // Objects can generate examples automatically
+      isArray ||                  // Arrays can generate examples automatically
       this._renderMainExample     // Has explicit examples
     );
     
-    // Effective media type - use 'application/json' as default for objects without mediaType
-    this._exampleMediaType = this.mediaType || (isObject ? 'application/json' : undefined);
+    // Effective media type - use 'application/json' as default for objects and arrays without mediaType
+    this._exampleMediaType = this.mediaType || (isObject || isArray ? 'application/json' : undefined);
   }
 
   /**
@@ -1141,7 +1143,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       : this._renderMainExample;
     const exampleMediaType = this._exampleMediaType !== undefined
       ? this._exampleMediaType
-      : (this.mediaType || (this.isObject ? 'application/json' : undefined));
+      : (this.mediaType || (this.isObject || this.isArray ? 'application/json' : undefined));
     
     return html`<style>${this.styles}</style>
       ${shouldRenderExamples ? html`<section class="examples">
