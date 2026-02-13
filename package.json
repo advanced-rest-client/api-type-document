@@ -35,6 +35,7 @@
     "lit-element": "^2.4.0"
   },
   "devDependencies": {
+    "@api-components/api-navigation": "^4.3.21",
     "@advanced-rest-client/arc-demo-helper": "^3.0.3",
     "@anypoint-web-components/anypoint-checkbox": "^1.2.2",
     "@anypoint-web-components/anypoint-styles": "^1.0.2",

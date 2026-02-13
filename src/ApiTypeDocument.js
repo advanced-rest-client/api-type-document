@@ -1137,16 +1137,8 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     parts +=
       'code-content-action-button-active, code-wrapper, example-code-wrapper, markdown-html';
     const mediaTypes = (this.mediaTypes || []);
-    // Use cached values if available, otherwise fallback to computed values
-    const shouldRenderExamples = this._showExamples !== undefined 
-      ? this._showExamples 
-      : this._renderMainExample;
-    const exampleMediaType = this._exampleMediaType !== undefined
-      ? this._exampleMediaType
-      : (this.mediaType || (this.isObject || this.isArray ? 'application/json' : undefined));
-    
     return html`<style>${this.styles}</style>
-      ${shouldRenderExamples ? html`<section class="examples">
+      <section class="examples" ?hidden="${!this._renderMainExample}">
         ${this.shouldRenderMediaSelector
         ? html`<div class="media-type-selector">
               <span>Media type:</span>
@@ -1172,17 +1164,17 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
           .amf="${this.amf}"
           .payloadId="${this.selectedBodyId}"
           .examples="${this._resolvedExampleType || this._resolvedType}"
-          .mediaType="${exampleMediaType}"
+          .mediaType="${this.mediaType}"
           .typeName="${this.parentTypeName}"
           @has-examples-changed="${this._hasExamplesHandler}"
           ?noauto="${!!this.isScalar}"
           ?noactions="${this.noExamplesActions}"
-          ?rawOnly="${!exampleMediaType}"
+          ?rawOnly="${!this.mediaType}"
           ?compatibility="${this.compatibility}"
           exportParts="${parts}"
           ?renderReadOnly="${this.renderReadOnly}"
         ></api-resource-example-document>
-      </section>` : ''}
+      </section>
 
       ${this.isObject ? this._objectTemplate() : ''}
       ${this.isArray ? this._arrayTemplate() : ''}
