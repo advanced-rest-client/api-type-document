@@ -64,6 +64,7 @@ dist/
 !demo/avro.json
 !demo/avro2.json
 !demo/grpc-test.json
+!demo/product-order-minimal.json
 
 .idea/
 .codegenie/
