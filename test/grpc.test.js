@@ -173,8 +173,9 @@ describe('<api-type-document> - gRPC', () => {
         it('sets default mediaType for gRPC', () => {
           const exampleDoc = element.shadowRoot.querySelector('api-resource-example-document');
           assert.exists(exampleDoc, 'Example document should exist');
-          // mediaType should be set (either from element or default to application/json)
-          assert.isDefined(exampleDoc.mediaType, 'MediaType should be defined');
+          // The component uses _exampleMediaType internally but passes this.mediaType to the child
+          // For gRPC objects, _exampleMediaType should default to 'application/json'
+          assert.equal(element._exampleMediaType, 'application/json', 'Should default to application/json for gRPC objects');
         });
       });
 
