@@ -531,6 +531,35 @@ const mxFunction = (base) => {
             );
             label = this._getValue(item, linkLabelKey);
           }
+          // gRPC oneOf: label may be on the range of the single property (NodeShape wrapper)
+          if (
+            !label &&
+            this._hasType(item, this.ns.w3.shacl.NodeShape)
+          ) {
+            const propKey = this._getAmfKey(this.ns.w3.shacl.property);
+            const props = this._ensureArray(item[propKey]);
+            const firstProp = props && props[0];
+            if (firstProp) {
+              const rangeKey = this._getAmfKey(
+                this.ns.aml.vocabularies.shapes.range
+              );
+              const rangeArr = this._ensureArray(firstProp[rangeKey]);
+              const range = rangeArr && rangeArr[0];
+              const resolvedRange = range ? this._resolve(range) : undefined;
+              if (resolvedRange) {
+                label = this._getValue(resolvedRange, this.ns.aml.vocabularies.core.name);
+                if (!label) {
+                  label = this._getValue(resolvedRange, this.ns.w3.shacl.name);
+                }
+                if (!label) {
+                  const linkLabelKey = this._getAmfKey(
+                    this.ns.aml.vocabularies.document.linkLabel
+                  );
+                  label = this._getValue(resolvedRange, linkLabelKey);
+                }
+              }
+            }
+          }
           if (
             !label &&
             this._hasType(item, this.ns.aml.vocabularies.shapes.ScalarShape)
