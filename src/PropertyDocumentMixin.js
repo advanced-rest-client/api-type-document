@@ -213,6 +213,11 @@ const mxFunction = (base) => {
       if (this._hasType(range, rs.RecursiveShape)) {
         return 'Recursive';
       }
+      // Enum: ScalarShape or other shape with shacl:in (allowed values)
+      const inKey = this._getAmfKey(this.ns.w3.shacl.in);
+      if (range[inKey]) {
+        return 'Enum';
+      }
       return 'Unknown type';
     }
 
@@ -272,8 +277,13 @@ const mxFunction = (base) => {
           return 'Bytes'
         case sc.fixed:
           return 'Fixed'
-        default:
+        default: {
+          const inKey = this._getAmfKey(this.ns.w3.shacl.in);
+          if (range[inKey]) {
+            return 'Enum';
+          }
           return 'Unknown type';
+        }
       }
     }
 
@@ -556,6 +566,12 @@ const mxFunction = (base) => {
                     this.ns.aml.vocabularies.document.linkLabel
                   );
                   label = this._getValue(resolvedRange, linkLabelKey);
+                }
+                if (
+                  !label &&
+                  this._hasType(resolvedRange, this.ns.aml.vocabularies.shapes.ScalarShape)
+                ) {
+                  label = this._computeRangeDataType(resolvedRange);
                 }
               }
             }
