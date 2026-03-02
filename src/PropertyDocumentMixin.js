@@ -524,6 +524,13 @@ const mxFunction = (base) => {
           if (!label) {
             label = this._getValue(item, this.ns.w3.shacl.name);
           }
+          // Check for link-label (gRPC message types)
+          if (!label) {
+            const linkLabelKey = this._getAmfKey(
+              this.ns.aml.vocabularies.document.linkLabel
+            );
+            label = this._getValue(item, linkLabelKey);
+          }
           if (
             !label &&
             this._hasType(item, this.ns.aml.vocabularies.shapes.ScalarShape)
