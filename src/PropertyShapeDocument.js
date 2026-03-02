@@ -1028,7 +1028,8 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
               >Required</span
             >`
           : ''}
-        ${this.isEnum
+        ${this.isEnum &&
+        this._getTypeLabelData().dataType !== 'Enum'
           ? html`<span
               class="enum-type"
               title="This property represent enumerable value"
