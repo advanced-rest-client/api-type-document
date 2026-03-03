@@ -99,7 +99,8 @@ class ApiDemo extends ApiDemoPage {
 
   _apiListTemplate() {
     return [
-      ['product-order-minimal', 'W-21368901 - Deep allOf'],
+      ['product-order-deep-allof', 'W-21368901 - Deep allOf'],
+      ['product-order-minimal', 'Product Order Minimal'],
       ['grpc-test', 'GRPC test'],
       ['nested-examples-oas3', 'Nested Examples'],
       ['nullable-test', 'Nullable Test (Comprehensive)'],

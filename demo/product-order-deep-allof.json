@@ -1,0 +1,337 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Product Order API - Minimal",
+    "version": "1.0.0",
+    "description": "Minimal API spec to reproduce allOf issue with PXCAppointmentRef"
+  },
+  "paths": {
+    "/productOrder/{id}": {
+      "get": {
+        "summary": "Retrieves a ProductOrder by ID",
+        "description": "This operation retrieves a ProductOrder entity.",
+        "operationId": "retrieveProductOrder",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Id"
+          },
+          {
+            "$ref": "#/components/parameters/Fields"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200ProductOrder_Get"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "Id": {
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "in": "path",
+        "description": "Identifier of the Resource"
+      },
+      "Fields": {
+        "name": "fields",
+        "in": "query",
+        "description": "Comma-separated properties to be provided in response",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "responses": {
+      "200ProductOrder_Get": {
+        "description": "Success",
+        "content": {
+          "application/json": {
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ProductOrder"
+                },
+                {
+                  "$ref": "#/components/schemas/PXCProductOrder"
+                }
+              ]
+            },
+            "examples": {
+              "example1": {
+                "value": {
+                  "@type": "PXCProductOrder",
+                  "id": "PRD123",
+                  "href": "/productOrder/PRD123",
+                  "productOrderItem": [
+                    {
+                      "@type": "PXCProductOrderItem",
+                      "id": "0001",
+                      "appointment": {
+                        "@type": "PXCAppointmentRef",
+                        "id": "30104",
+                        "date": "2024-09-27",
+                        "timeSlot": "AM"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Extensible": {
+        "type": "object",
+        "description": "Base Extensible schema for use in TMForum Open-APIs",
+        "properties": {
+          "@type": {
+            "type": "string",
+            "description": "When sub-classing, this defines the sub-class Extensible name"
+          },
+          "@baseType": {
+            "type": "string",
+            "description": "When sub-classing, this defines the super-class"
+          },
+          "@schemaLocation": {
+            "type": "string",
+            "description": "A URI to a JSON-Schema file that defines additional attributes and relationships"
+          }
+        },
+        "required": [
+          "@type"
+        ]
+      },
+      "Addressable": {
+        "type": "object",
+        "description": "Base schema for addressable entities",
+        "properties": {
+          "href": {
+            "type": "string",
+            "description": "Hyperlink reference"
+          },
+          "id": {
+            "type": "string",
+            "description": "unique identifier"
+          }
+        }
+      },
+      "Entity": {
+        "type": "object",
+        "description": "Base entity schema for use in TMForum Open-APIs",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Extensible"
+          },
+          {
+            "$ref": "#/components/schemas/Addressable"
+          }
+        ]
+      },
+      "EntityRef": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Extensible"
+          },
+          {
+            "$ref": "#/components/schemas/Addressable"
+          },
+          {
+            "type": "object",
+            "description": "Entity reference schema to be use for all entityRef class",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The identifier of the referred entity"
+              },
+              "href": {
+                "type": "string",
+                "description": "The URI of the referred entity"
+              },
+              "name": {
+                "type": "string",
+                "description": "Name of the referred entity"
+              },
+              "@referredType": {
+                "type": "string",
+                "description": "The actual type of the target instance when needed for disambiguation"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        ]
+      },
+      "AppointmentRef": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Extensible"
+          },
+          {
+            "$ref": "#/components/schemas/EntityRef"
+          },
+          {
+            "type": "object",
+            "description": "Refers an appointment, such as a Customer presentation or internal meeting or site visit",
+            "properties": {
+              "description": {
+                "type": "string",
+                "description": "An explanatory text regarding the appointment made with a party"
+              }
+            }
+          }
+        ],
+        "discriminator": {
+          "propertyName": "@type",
+          "mapping": {
+            "AppointmentRef": "#/components/schemas/AppointmentRef"
+          }
+        }
+      },
+      "PXCAppointmentRef": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AppointmentRef"
+          },
+          {
+            "type": "object",
+            "description": "Refers an appointment, such as a Customer presentation or internal meeting or site visit",
+            "properties": {
+              "date": {
+                "type": "string",
+                "format": "date",
+                "description": "Appointment Date."
+              },
+              "timeSlot": {
+                "type": "string",
+                "description": "Appointment Timeslot. Values can be AM/PM."
+              }
+            }
+          }
+        ],
+        "discriminator": {
+          "propertyName": "@type",
+          "mapping": {
+            "PXCAppointmentRef": "#/components/schemas/PXCAppointmentRef"
+          }
+        }
+      },
+      "ProductOrderItem": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Extensible"
+          },
+          {
+            "type": "object",
+            "description": "An identified part of the order. A product order is decomposed into one or more order items.",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Identifier of the line item"
+              },
+              "quantity": {
+                "type": "integer",
+                "description": "Quantity ordered"
+              },
+              "appointment": {
+                "$ref": "#/components/schemas/AppointmentRef"
+              }
+            }
+          }
+        ]
+      },
+      "PXCProductOrderItem": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ProductOrderItem"
+          },
+          {
+            "type": "object",
+            "description": "A reference to ProductOrder item that has been executed previously."
+          }
+        ],
+        "properties": {
+          "appointment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AppointmentRef"
+              },
+              {
+                "$ref": "#/components/schemas/PXCAppointmentRef"
+              }
+            ]
+          }
+        },
+        "discriminator": {
+          "propertyName": "@type",
+          "mapping": {
+            "PXCProductOrderItem": "#/components/schemas/PXCProductOrderItem"
+          }
+        }
+      },
+      "ProductOrder": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Entity"
+          },
+          {
+            "type": "object",
+            "description": "A Product Order is a type of order which can be used to place an order",
+            "properties": {
+              "state": {
+                "type": "string",
+                "description": "State of the order"
+              },
+              "description": {
+                "type": "string",
+                "description": "Description of the product order"
+              },
+              "productOrderItem": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProductOrderItem"
+                },
+                "minItems": 1
+              }
+            }
+          }
+        ]
+      },
+      "PXCProductOrder": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ProductOrder"
+          },
+          {
+            "type": "object",
+            "description": "Representation of PXCProductOrder",
+            "properties": {
+              "productOrderItem": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ProductOrderItem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PXCProductOrderItem"
+                    }
+                  ]
+                },
+                "minItems": 1
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
