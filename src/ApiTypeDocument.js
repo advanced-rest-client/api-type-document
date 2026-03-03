@@ -775,7 +775,22 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     }
     
     const propertyKey = this._getAmfKey(this.ns.w3.shacl.property);
-    const itemProperties = this._ensureArray(resolvedItem[propertyKey]||[])
+    const andKey = this._getAmfKey(this.ns.w3.shacl.and);
+
+    // Collect direct properties
+    let itemProperties = this._ensureArray(resolvedItem[propertyKey]||[])
+
+    // If this has nested allOf (shacl:and), collect properties recursively to handle 4+ level chains
+    // This augments the direct properties with properties from deeply nested allOf structures
+    if (resolvedItem[andKey]) {
+      const visited = new Set();
+      const allOfProperties = this._collectAndPropertiesRecursive(resolvedItem, 0, visited);
+      // Merge with direct properties (if any) - use Set to deduplicate by @id
+      const propertyIds = new Set(itemProperties.map(p => p['@id']).filter(Boolean));
+      const uniqueAllOfProperties = allOfProperties.filter(p => !p['@id'] || !propertyIds.has(p['@id']));
+      itemProperties = [...itemProperties, ...uniqueAllOfProperties];
+    }
+
     const additionalPropertiesKey = this._getAmfKey(this.ns.w3.shacl.additionalPropertiesSchema);
 
     // If the item doesn't have additional properties, filter the read-only properties and return
@@ -784,7 +799,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     }
 
     const additionalPropertiesSchema = this._ensureArray(resolvedItem[additionalPropertiesKey])
-    
+
     // If the item does have additional properties, ensure they are in an array
     const additionalProperties = this._ensureArray(additionalPropertiesSchema[0][propertyKey] || additionalPropertiesSchema[0])
 
@@ -827,6 +842,65 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
         type: item,
       };
     });
+  }
+
+  /**
+   * Recursively collects properties from nested allOf (shacl:and) chains.
+   * Handles deeply nested allOf structures (4+ levels) in API schemas.
+   * @param {Object} item AMF shape object
+   * @param {Number} depth Current recursion depth
+   * @param {Set} visited Set of visited shape IDs to prevent circular references
+   * @param {Number} maxDepth Maximum recursion depth (default 10)
+   * @return {Array} Flat array of all properties from nested allOf chains
+   * @private
+   */
+  _collectAndPropertiesRecursive(item, depth = 0, visited = new Set(), maxDepth = 10) {
+    // Safety check: prevent infinite recursion
+    if (depth >= maxDepth) {
+      console.warn(`[ApiTypeDocument] Maximum allOf depth (${maxDepth}) reached. Stopping recursion.`);
+      return [];
+    }
+
+    // Circular reference detection
+    const itemId = item['@id'];
+    if (itemId && visited.has(itemId)) {
+      return [];
+    }
+    if (itemId) {
+      visited.add(itemId);
+    }
+
+    // Resolve link-target references
+    const resolved = this._resolve(item);
+    if (!resolved) {
+      return [];
+    }
+
+    const propertyKey = this._getAmfKey(this.ns.w3.shacl.property);
+    const andKey = this._getAmfKey(this.ns.w3.shacl.and);
+
+    // Collect direct properties from this shape
+    const directProperties = this._ensureArray(resolved[propertyKey]) || [];
+    let allProperties = [...directProperties];
+
+    // Recursively collect properties from nested allOf chains
+    const andArray = this._ensureArray(resolved[andKey]);
+    if (andArray && andArray.length > 0) {
+      for (let i = 0; i < andArray.length; i++) {
+        const nestedItem = andArray[i];
+        if (nestedItem) {
+          const nestedProperties = this._collectAndPropertiesRecursive(
+            nestedItem,
+            depth + 1,
+            visited,
+            maxDepth
+          );
+          allProperties = [...allProperties, ...nestedProperties];
+        }
+      }
+    }
+
+    return allProperties;
   }
 
   /**
