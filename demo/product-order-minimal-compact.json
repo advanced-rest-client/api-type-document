@@ -4452,7 +4452,7 @@
     ],
     "core:description": [
     {
-    "@value": "Appointment Date - THIS FIELD IS MISSING IN API CONSOLE"
+    "@value": "Appointment Date"
     }
     ],
     "sourcemaps:sources": [
@@ -4618,7 +4618,7 @@
     ],
     "core:description": [
     {
-    "@value": "Appointment Timeslot (AM/PM) - THIS FIELD IS MISSING IN API CONSOLE"
+    "@value": "Appointment Timeslot (AM/PM)"
     }
     ],
     "sourcemaps:sources": [

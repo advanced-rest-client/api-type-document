@@ -4452,7 +4452,7 @@
     ],
     "http://a.ml/vocabularies/core#description": [
     {
-    "@value": "Appointment Date - THIS FIELD IS MISSING IN API CONSOLE"
+    "@value": "Appointment Date"
     }
     ],
     "http://a.ml/vocabularies/document-source-maps#sources": [
@@ -4618,7 +4618,7 @@
     ],
     "http://a.ml/vocabularies/core#description": [
     {
-    "@value": "Appointment Timeslot (AM/PM) - THIS FIELD IS MISSING IN API CONSOLE"
+    "@value": "Appointment Timeslot (AM/PM)"
     }
     ],
     "http://a.ml/vocabularies/document-source-maps#sources": [
