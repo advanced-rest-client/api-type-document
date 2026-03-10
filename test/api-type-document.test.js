@@ -690,6 +690,17 @@ describe('<api-type-document>', () => {
           assert.equal(buttons.length, 2);
         });
 
+        it('union toggle buttons have transparent background by default (dark mode fix)', () => {
+          const button = element.shadowRoot.querySelector('.union-toggle');
+          assert.ok(button, 'union toggle button should exist');
+          const styles = getComputedStyle(button);
+          assert.notEqual(
+            styles.backgroundColor,
+            'rgb(255, 255, 255)',
+            'should not use hardcoded white background (invisible in dark mode)'
+          );
+        });
+
         it('Button change selection', () => {
           const buttons = element.shadowRoot.querySelectorAll('.union-toggle');
           /** @type HTMLElement */ (buttons[1]).click();
