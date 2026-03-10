@@ -72,7 +72,7 @@ describe('<api-type-document> - gRPC', () => {
     let amf;
 
     before(async () => {
-      amf = await AmfLoader.load(compact, 'grpc-test');
+      amf = await AmfLoader.load(compact, 'grpc-test-old');
     });
 
       describe('link-target resolution', () => {
@@ -209,7 +209,7 @@ describe('<api-type-document> - gRPC', () => {
           assert.isDefined(props1, 'Should have initial computed properties');
           
           // Update amf reference (simulate amf reload)
-          const newAmf = await AmfLoader.load(compact, 'grpc-test');
+          const newAmf = await AmfLoader.load(compact, 'grpc-test-old');
           element.amf = newAmf;
           await nextFrame();
           await aTimeout(0);

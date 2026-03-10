@@ -64,6 +64,7 @@ dist/
 !demo/avro.json
 !demo/avro2.json
 !demo/grpc-test.json
+!demo/grpc-test-old.json
 !demo/product-order-minimal.json
 !demo/product-order-minimal-compact.json
 !demo/product-order-deep-allof.json
