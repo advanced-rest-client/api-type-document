@@ -41,10 +41,10 @@ export default css`
 
   .media-toggle {
     outline: none;
-    color: var(--api-type-document-media-button-color, #000);
+    color: var(--api-type-document-media-button-color, inherit);
     background-color: var(
       --api-type-document-media-button-background-color,
-      #fff
+      transparent
     );
     border-width: 1px;
     border-color: var(--api-type-document-media-button-border-color, #a3b11d);
@@ -64,9 +64,9 @@ export default css`
     outline: none;
     background-color: var(
       --api-type-document-union-button-background-color,
-      #fff
+      transparent
     );
-    color: var(--api-type-document-union-button-color, #000);
+    color: var(--api-type-document-union-button-color, inherit);
     border-width: 1px;
     border-color: var(--api-type-document-media-button-border-color, #a3b11d);
     border-style: solid;
