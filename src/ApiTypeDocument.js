@@ -292,7 +292,8 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     this.requestUpdate('noMainExample', old);
     this._renderMainExample = this._computeRenderMainExample(
       value,
-      this._hasExamples
+      this._hasExamples,
+      this._isScalarLikeType(this._resolvedType)
     );
   }
 
@@ -307,7 +308,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     }
     this.__hasExamples = value;
     this.requestUpdate('_hasExamples', old);
-    const scalarType = this._hasType(this.type, this.ns.aml.vocabularies.shapes.ScalarShape);
+    const scalarType = this._isScalarLikeType(this._resolvedType);
     this._renderMainExample = this._computeRenderMainExample(
       this.noMainExample,
       value,
@@ -363,6 +364,27 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
 
   _computeRenderMainExample(noMainExample, hasExamples, isScalar = false) {
     return isScalar ? false : !!(!noMainExample && hasExamples);
+  }
+
+  /**
+   * Whether the type renders as a scalar for the purpose of the main example.
+   * Scalar, Nil, and nullable unions (`type | null`) are scalar-like here,
+   * matching `_typeChanged`: all suppress the standalone main-example section
+   * (the value is shown inline). Nullable unions must agree with `_typeChanged`
+   * or the empty `.examples` section reappears for `type: [T, null]` shapes.
+   * @param {Array|Object} type AMF type shape (pass the resolved type)
+   * @returns {boolean}
+   */
+  _isScalarLikeType(type) {
+    if (!type) {
+      return false;
+    }
+    const { shapes } = this.ns.aml.vocabularies;
+    if (this._hasType(type, shapes.ScalarShape) || this._hasType(type, shapes.NilShape)) {
+      return true;
+    }
+    const nullableCheck = this._checkNullableUnion(type);
+    return !!(nullableCheck && nullableCheck.isNullable);
   }
 
   /**

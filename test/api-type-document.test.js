@@ -608,10 +608,9 @@ describe('<api-type-document>', () => {
         });
 
         it('Does not render main example', () => {
-          const examples = element.shadowRoot.querySelector(
-            'examples'
-          );
-          assert.notOk(examples);
+          const examples = element.shadowRoot.querySelector('.examples');
+          assert.exists(examples);
+          assert.isTrue(examples.hasAttribute('hidden'));
         });
       });
 
@@ -628,6 +627,12 @@ describe('<api-type-document>', () => {
 
         it('isScalar is true', () => {
           assert.isTrue(element.isScalar);
+        });
+
+        it('Does not render main example', () => {
+          const examples = element.shadowRoot.querySelector('.examples');
+          assert.exists(examples);
+          assert.isTrue(examples.hasAttribute('hidden'));
         });
       });
 
