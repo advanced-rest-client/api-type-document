@@ -69,6 +69,8 @@ dist/
 !demo/product-order-minimal-compact.json
 !demo/product-order-deep-allof.json
 !demo/product-order-deep-allof-compact.json
+!demo/oas31-webhooks.json
+!demo/oas31-webhooks-compact.json
 
 .idea/
 .codegenie/

@@ -486,6 +486,25 @@ const mxFunction = (base) => {
    }
 
     /**
+     * Detects AMF synthetic placeholder type names that must not be shown to
+     * users as composition variant labels. AMF generates names like `item0`,
+     * `item1` or `amf_inline_type_...` for inline anonymous schemas
+     * (e.g. OAS 3.1/3.2 oneOf/anyOf members without an explicit name).
+     *
+     * The `item` match is anchored (`^item\d+$`) so legit names literally
+     * called `item` or `items` are NOT treated as placeholders.
+     *
+     * @param {string} label Candidate label resolved from a shape's name.
+     * @return {boolean} True when the label is an AMF-generated placeholder.
+     */
+    _isPlaceholderTypeLabel(label) {
+      if (!label) {
+        return false;
+      }
+      return /^item\d+$/.test(label) || /^amf_inline_type/.test(label);
+    }
+
+    /**
      * Computes list of type labels to render.
      *
      * @param {any} range
@@ -497,7 +516,7 @@ const mxFunction = (base) => {
       if (!list) {
         return undefined;
       }
-      return list.map((obj) => {
+      return list.map((obj, index) => {
         const avroValue = this._computeAvroShapeRangeSourceMap(obj) || null
         let item = obj;
         if (Array.isArray(item)) {
@@ -582,6 +601,14 @@ const mxFunction = (base) => {
           ) {
             label = this._computeRangeDataType(item);
           }
+        }
+        // AMF gives inline anonymous variants synthetic names (item0, item1,
+        // amf_inline_type_...). Since oneOf/anyOf render as clickable tabs, a
+        // distinguishable human-readable label is needed per variant.
+        if (this._isPlaceholderTypeLabel(/** @type string */ (label))) {
+          label = isScalar
+            ? this._computeRangeDataType(item)
+            : `Option ${index + 1}`;
         }
         if (!label) {
           label = 'Unnamed type';

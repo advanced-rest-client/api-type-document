@@ -856,7 +856,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
           this.ns.w3.shacl.name
         ));
       }
-      if (label && label.indexOf('item') === 0) {
+      if (this._isPlaceholderTypeLabel(label)) {
         label = undefined;
       }
       return {
