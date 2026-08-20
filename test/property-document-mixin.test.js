@@ -177,14 +177,6 @@ describe('PropertyDocumentMixin', () => {
 
   describe('_computeRangeDataType() - ScalarShape - compact model', () => {
     let element;
-    const shape = {
-      '@type': ['raml-shapes:ScalarShape'],
-      'shacl:datatype': [
-        {
-          '@id': '',
-        },
-      ],
-    };
 
     before(async () => {
       const model = await AmfLoader.load(true);
@@ -192,8 +184,20 @@ describe('PropertyDocumentMixin', () => {
       element.amf = model;
     });
 
-    function setType(type) {
-      shape['shacl:datatype'][0]['@id'] = type;
+    // amf 5.11 compact models serialise `@type`/keys with the compacted IRIs
+    // defined by the model's own `@context` (not the fixed `raml-shapes:` /
+    // `shacl:` prefixes amf 4.7 used). Build the shape from the loaded model's
+    // context via `_getAmfKey` so the test drives off the real serialization
+    // instead of a hard-coded prefix.
+    function makeShape(datatypeId) {
+      const typeKey = element._getAmfKey(
+        element.ns.aml.vocabularies.shapes.ScalarShape
+      );
+      const datatypeKey = element._getAmfKey(element.ns.w3.shacl.datatype);
+      return {
+        '@type': [typeKey],
+        [datatypeKey]: [{ '@id': datatypeId }],
+      };
     }
 
     [
@@ -213,8 +217,7 @@ describe('PropertyDocumentMixin', () => {
       ['UNKNOWN', 'Unknown type'],
     ].forEach((item) => {
       it(`Computes ${item[0]}`, () => {
-        setType(item[0]);
-        const result = element._computeRangeDataType(shape);
+        const result = element._computeRangeDataType(makeShape(item[0]));
         assert.equal(result, item[1]);
       });
     });

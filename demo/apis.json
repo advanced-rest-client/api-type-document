@@ -31,5 +31,6 @@
   "nulleable/nulleable.yaml": "OAS 3.0",
   "nullable-test/nullable-test.yaml": { "type": "OAS 3.0", "mime": "application/yaml" },
   "nested-examples/nested-examples-oas3.json": { "type": "OAS 3.0", "mime": "application/json" },
-  "product-order-minimal.json": { "type": "OAS 3.0", "mime": "application/json" }
+  "product-order-minimal.json": { "type": "OAS 3.0", "mime": "application/json" },
+  "oas31-webhooks/oas31-webhooks.yaml": { "type": "OAS 3.1", "mime": "application/yaml" }
 }

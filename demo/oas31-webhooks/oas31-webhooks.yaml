@@ -104,3 +104,33 @@ components:
             ownerEmail:
               type: string
               format: email
+
+    # oneOf with inline anonymous object members (no $ref). AMF assigns synthetic
+    # names (item0/item1); the component must render positional "Option N" labels.
+    InlineChoice:
+      oneOf:
+        - type: object
+          properties:
+            a:
+              type: string
+        - type: object
+          properties:
+            b:
+              type: integer
+
+    # oneOf whose first member is an inline anonymous scalar. The synthetic name
+    # must be replaced by the datatype label ("String").
+    ScalarChoice:
+      oneOf:
+        - type: string
+        - type: integer
+
+    # allOf mixing a named $ref (PetBase, preserved) with an inline anonymous
+    # member (synthetic name -> label nulled).
+    MixedAllOf:
+      allOf:
+        - $ref: "#/components/schemas/PetBase"
+        - type: object
+          properties:
+            extra:
+              type: string

@@ -1,13 +1,38 @@
-import { LitElement } from 'lit-element';
 import { AmfHelperMixin } from '@api-components/amf-helper-mixin/amf-helper-mixin.js';
 
-class HelperElement extends AmfHelperMixin(LitElement) {}
-window.customElements.define('helper-element', HelperElement);
+/**
+ * @mixes AmfHelperMixin
+ */
+class HelperElement extends AmfHelperMixin(Object) {}
 
 const helper = new HelperElement();
 
+/**
+ * Sets the model on the helper and returns the expanded model to navigate.
+ *
+ * amf 5.11.x emits models in flattened `@graph` form. The `amf` setter expands
+ * them internally (see AmfHelperMixin `_expand`), but the raw `@graph` model is
+ * not navigable by the `_compute*` helpers or by direct key indexing — its
+ * `declares`/`encodes` live under `@graph[0]` behind full IRIs. Callers must
+ * operate on the expanded model returned here.
+ *
+ * @param {Object|Array} model Raw (possibly flattened/`@graph`) API model.
+ * @return {Object} Expanded model ready for navigation.
+ */
+const expand = (model) => {
+  helper.amf = model;
+  const { amf } = helper;
+  return Array.isArray(amf) ? amf[0] : amf;
+};
+
 export const AmfLoader = {};
-AmfLoader.load = async function (compact, modelFile) {
+
+/**
+ * Downloads the raw model file. amf 5.11.x writes it in flattened `@graph`
+ * form; use `AmfLoader.load` (which expands) for anything that navigates the
+ * model directly.
+ */
+AmfLoader.loadRaw = async function (compact, modelFile) {
   modelFile = modelFile || 'demo-api';
   const file = '/' + modelFile + (compact ? '-compact' : '') + '.json';
   const url = location.protocol + '//' + location.host + '/base/demo/' + file;
@@ -22,17 +47,30 @@ AmfLoader.load = async function (compact, modelFile) {
   });
 };
 
+/**
+ * Downloads and expands the model. amf 5.11.x emits flattened `@graph` models
+ * that the `_compute*` helpers and direct key indexing cannot navigate; the
+ * expanded model restores the array-of-one-document shape callers expect (and
+ * that the `amf` setter also produces internally). Returned as a single-element
+ * array for backwards compatibility with callers that read `model[0]`.
+ */
+AmfLoader.load = async function (compact, modelFile) {
+  const raw = await AmfLoader.loadRaw(compact, modelFile);
+  const expanded = expand(raw);
+  return Array.isArray(expanded) ? expanded : [expanded];
+};
+
 AmfLoader.loadType = async function (name, compact, modelFile) {
-  let amf = await AmfLoader.load(compact, modelFile);
-  if (amf instanceof Array) {
-    amf = amf[0];
-  }
-  helper.amf = amf;
+  const raw = await AmfLoader.loadRaw(compact, modelFile);
+  const amf = expand(raw);
   const ns = helper.ns;
   const decKey = helper._getAmfKey(ns.aml.vocabularies.document.declares);
   const nameKey = helper._getAmfKey(ns.w3.shacl.name);
 
-  const defs = amf[decKey];
+  const defs = helper._ensureArray(amf[decKey]);
+  if (!defs) {
+    return undefined;
+  }
   for (let i = 0; i < defs.length; i++) {
     let type = defs[i];
     if (type instanceof Array) {
@@ -50,11 +88,12 @@ AmfLoader.loadType = async function (name, compact, modelFile) {
       return [amf, type];
     }
   }
+  return undefined;
 };
 
 AmfLoader.lookupEndpoint = function (model, endpoint) {
-  helper.amf = model;
-  const webApi = helper._computeWebApi(model);
+  const expanded = expand(model);
+  const webApi = helper._computeWebApi(expanded);
   return helper._computeEndpointByPath(webApi, endpoint);
 };
 
@@ -84,7 +123,7 @@ AmfLoader.lookupPayload = function (model, endpoint, operation) {
 };
 
 AmfLoader.lookupPayloadProperty = function (model, payload, property) {
-  helper.amf = model;
+  expand(model);
   const shape =
     payload[helper._getAmfKey(helper.ns.aml.vocabularies.shapes.schema)][0];
   const properties = shape[helper._getAmfKey(helper.ns.w3.shacl.property)];
@@ -98,19 +137,15 @@ AmfLoader.lookupPayloadProperty = function (model, payload, property) {
 };
 
 AmfLoader.lookupArrayItemRange = function (model, array) {
-  helper.amf = model;
+  expand(model);
   const range =
     array[helper._getAmfKey(helper.ns.aml.vocabularies.shapes.range)][0];
   helper._resolve(range);
   return range;
-  // const key = helper._getAmfKey(helper.ns.aml.vocabularies.shapes.items);
-  // const items = helper._ensureArray(range[key]);
-  // const item = items[0];
-  // console.log(range);
 };
 
 AmfLoader.lookupPropertyShape = function (model, type, property) {
-  helper.amf = model;
+  expand(model);
   const propKey = helper._getAmfKey(helper.ns.w3.shacl.property);
   const props = type[propKey];
   for (let i = 0, len = props.length; i < len; i++) {
