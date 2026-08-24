@@ -1,7 +1,7 @@
 {
   "name": "@api-components/api-type-document",
   "description": "A documentation table for type (resource) properties. Works with AMF data model",
-  "version": "4.2.44",
+  "version": "4.2.45",
   "license": "Apache-2.0",
   "main": "index.js",
   "module": "index.js",
@@ -39,7 +39,7 @@
     "@advanced-rest-client/arc-demo-helper": "^3.0.3",
     "@anypoint-web-components/anypoint-checkbox": "^1.2.2",
     "@anypoint-web-components/anypoint-styles": "^1.0.2",
-    "@api-components/api-model-generator": "^0.2.14",
+    "@api-components/api-model-generator": "^0.4.0",
     "@commitlint/cli": "^13.2.1",
     "@commitlint/config-conventional": "^13.2.0",
     "@open-wc/eslint-config": "^4.2.0",

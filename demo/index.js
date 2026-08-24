@@ -99,6 +99,7 @@ class ApiDemo extends ApiDemoPage {
 
   _apiListTemplate() {
     return [
+      ['oas31-webhooks', 'OAS 3.1 composition (oneOf/anyOf/allOf)'],
       ['product-order-deep-allof', 'W-21368901 - Deep allOf'],
       ['product-order-minimal', 'Product Order Minimal'],
       ['grpc-test', 'GRPC test'],

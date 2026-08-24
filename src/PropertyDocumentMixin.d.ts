@@ -136,6 +136,16 @@ interface PropertyDocumentMixin extends AmfHelperMixin {
   _computeIsAllOf(range: Object): boolean
 
   /**
+   * Detects AMF synthetic placeholder type names (e.g. `item0`, `item1`,
+   * `amf_inline_type_...`) that must not be shown as composition variant
+   * labels. Anchored so legit names like `item`/`items` are not matched.
+   *
+   * @param label Candidate label resolved from a shape's name.
+   * @returns True when the label is an AMF-generated placeholder.
+   */
+  _isPlaceholderTypeLabel(label: string): boolean;
+
+  /**
    * Computes list of type labels to render.
    *
    * @param {Object} range
