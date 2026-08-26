@@ -140,6 +140,22 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
        */
       anyOfTypes: { type: Array },
       /**
+       * True if given `type` carries JSON Schema `if`/`then`/`else` conditional keywords.
+       */
+      isConditional: { type: Boolean },
+      /**
+       * Resolved AMF shape for the `if` condition branch.
+       */
+      ifShape: { type: Object },
+      /**
+       * Resolved AMF shape for the `then` branch.
+       */
+      thenShape: { type: Object },
+      /**
+       * Resolved AMF shape for the `else` branch. Optional per JSON Schema (else may be omitted).
+       */
+      elseShape: { type: Object },
+      /**
        * List of types definition and name for OAS' "and" type
        */
       andTypes: { type: Array },
@@ -529,6 +545,20 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
         isScalar = true;
       }
     }
+    const ifKey = this._getAmfKey(this._shaclConditionalKey('if'));
+    let isConditional = false;
+    let ifShape;
+    let thenShape;
+    let elseShape;
+    if (this._hasProperty(type, ifKey)) {
+      isConditional = true;
+      isScalar = false; // a conditional shape is never purely scalar
+      const thenKey = this._getAmfKey(this._shaclConditionalKey('then'));
+      const elseKey = this._getAmfKey(this._shaclConditionalKey('else'));
+      ifShape = this._resolveConditionalBranch(type[ifKey]);
+      thenShape = this._resolveConditionalBranch(type[thenKey]);
+      elseShape = this._resolveConditionalBranch(type[elseKey]);
+    }
     this.isScalar = isScalar;
     this.isArray = isArray;
     this.isObject = isObject;
@@ -536,6 +566,10 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     this.isAnd = isAnd;
     this.isOneOf = isOneOf;
     this.isAnyOf = isAnyOf;
+    this.isConditional = isConditional;
+    this.ifShape = ifShape;
+    this.thenShape = thenShape;
+    this.elseShape = elseShape;
     
     // Compute properties for objects - this needs to be reactive
     if (isObject) {
@@ -563,6 +597,33 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     
     // Effective media type - use 'application/json' as default for objects and arrays without mediaType
     this._exampleMediaType = this.mediaType || (isObject || isArray ? 'application/json' : undefined);
+  }
+
+  /**
+   * Builds the raw SHACL IRI for `if`/`then`/`else`. These are JSON Schema 2020-12
+   * conditional keywords and are not present in the frozen `ns.w3.shacl` namespace
+   * from amf-helper-mixin, so the raw IRI is constructed directly. The result is a
+   * valid input to `_getAmfKey`/`_hasProperty`, same as `this.ns.w3.shacl.or` etc.
+   * @param {'if'|'then'|'else'} suffix
+   * @returns {string}
+   * @private
+   */
+  _shaclConditionalKey(suffix) {
+    return `${this.ns.w3.shacl.key}${suffix}`;
+  }
+
+  /**
+   * Extracts and resolves a single if/then/else branch value. Each of
+   * `shacl#if`/`then`/`else` holds exactly one shape (unlike `shacl#and`/`or`/`xone`,
+   * which are arrays), but defends with `_ensureArray` in case a producer wraps it,
+   * matching the pattern already used for `items`/`and`/`or` elsewhere in this file.
+   * @param {Object|Object[]} value Raw value of the if/then/else key
+   * @returns {Object|undefined} Resolved branch shape
+   * @private
+   */
+  _resolveConditionalBranch(value) {
+    const [branch] = this._ensureArray(value) || [];
+    return branch ? this._resolve(branch) : undefined;
   }
 
   /**
@@ -1223,6 +1284,64 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
   }
 
   /**
+   * @return {TemplateResult|string} Template for a JSON Schema if/then/else conditional shape
+   * @private
+   */
+  _conditionalTemplate() {
+    const { ifShape, thenShape, elseShape } = this;
+    // A conditional needs the `if` trigger plus at least one consequent branch.
+    // `then` and `else` are each independently optional per JSON Schema, so render
+    // whichever branches are present rather than requiring `then`.
+    if (!ifShape || (!thenShape && !elseShape)) {
+      return '';
+    }
+    return html`
+      <p class="inheritance-label">If:</p>
+      <api-type-document
+        class="conditional-if-document"
+        .amf="${this.amf}"
+        .type="${ifShape}"
+        ?narrow="${this.narrow}"
+        ?noExamplesActions="${this.noExamplesActions}"
+        ?noMainExample="${this._renderMainExample}"
+        ?compatibility="${this.compatibility}"
+        .mediaType="${this.mediaType}"
+        ?graph="${this.graph}"
+      ></api-type-document>
+      ${thenShape
+        ? html`
+            <p class="inheritance-label">Then:</p>
+            <api-type-document
+              class="conditional-then-document"
+              .amf="${this.amf}"
+              .type="${thenShape}"
+              ?narrow="${this.narrow}"
+              ?noExamplesActions="${this.noExamplesActions}"
+              ?noMainExample="${this._renderMainExample}"
+              ?compatibility="${this.compatibility}"
+              .mediaType="${this.mediaType}"
+              ?graph="${this.graph}"
+            ></api-type-document>`
+        : ''}
+      ${elseShape
+        ? html`
+            <p class="inheritance-label">Else:</p>
+            <api-type-document
+              class="conditional-else-document"
+              .amf="${this.amf}"
+              .type="${elseShape}"
+              ?narrow="${this.narrow}"
+              ?noExamplesActions="${this.noExamplesActions}"
+              ?noMainExample="${this._renderMainExample}"
+              ?compatibility="${this.compatibility}"
+              .mediaType="${this.mediaType}"
+              ?graph="${this.graph}"
+            ></api-type-document>`
+        : ''}
+    `;
+  }
+
+  /**
    * @return {TemplateResult} Template for the element
    */
   render() {
@@ -1290,7 +1409,8 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       ${this.isUnion ? this._unionTemplate() : ''}
       ${this.isAnd ? this._anyTemplate() : ''}
       ${this.isAnyOf ? this._anyOfTemplate() : ''}
-      ${this.isOneOf ? this._oneOfTemplate() : ''}`;
+      ${this.isOneOf ? this._oneOfTemplate() : ''}
+      ${this.isConditional ? this._conditionalTemplate() : ''}`;
   }
 
   _filterReadOnlyProperties(properties) {

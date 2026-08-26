@@ -777,6 +777,213 @@ describe('<api-type-document>', () => {
         });
       });
 
+      describe('Conditional type (if/then/else)', () => {
+        let element = /** @type ApiTypeDocument */ (null);
+
+        beforeEach(async () => {
+          element = await basicFixture();
+        });
+
+        // @covers AC1
+        it('isConditional is true for PetKindFields', async () => {
+          const data = await AmfLoader.loadType(
+            'PetKindFields',
+            item[1],
+            'oas31-webhooks'
+          );
+          element.amf = data[0];
+          element._typeChanged(element._resolve(data[1]));
+          assert.isTrue(element.isConditional);
+        });
+
+        // @covers AC1
+        it('isScalar is false for PetKindFields (does not collapse to "Any")', async () => {
+          const data = await AmfLoader.loadType(
+            'PetKindFields',
+            item[1],
+            'oas31-webhooks'
+          );
+          element.amf = data[0];
+          element._typeChanged(element._resolve(data[1]));
+          assert.isFalse(element.isScalar);
+        });
+
+        // @covers AC1
+        it('resolves ifShape, thenShape and elseShape', async () => {
+          const data = await AmfLoader.loadType(
+            'PetKindFields',
+            item[1],
+            'oas31-webhooks'
+          );
+          element.amf = data[0];
+          element._typeChanged(element._resolve(data[1]));
+          assert.isOk(element.ifShape, 'ifShape is set');
+          assert.isOk(element.thenShape, 'thenShape is set');
+          assert.isOk(element.elseShape, 'elseShape is set');
+        });
+
+        // @covers AC1
+        it('if/then/else branches are NodeShape shapes', async () => {
+          const data = await AmfLoader.loadType(
+            'PetKindFields',
+            item[1],
+            'oas31-webhooks'
+          );
+          element.amf = data[0];
+          element._typeChanged(element._resolve(data[1]));
+          assert.isTrue(
+            element._hasType(element.ifShape, element.ns.w3.shacl.NodeShape),
+            'ifShape is a NodeShape'
+          );
+          assert.isTrue(
+            element._hasType(element.thenShape, element.ns.w3.shacl.NodeShape),
+            'thenShape is a NodeShape'
+          );
+          assert.isTrue(
+            element._hasType(element.elseShape, element.ns.w3.shacl.NodeShape),
+            'elseShape is a NodeShape'
+          );
+        });
+
+        // @covers AC2
+        it('renders if/then/else branch documents with kind/breed/indoor', async () => {
+          const data = await AmfLoader.loadType(
+            'PetKindFields',
+            item[1],
+            'oas31-webhooks'
+          );
+          element.amf = data[0];
+          element.type = data[1];
+          await aTimeout(0);
+          await nextFrame();
+
+          const ifDoc = element.shadowRoot.querySelector(
+            '.conditional-if-document'
+          );
+          const thenDoc = element.shadowRoot.querySelector(
+            '.conditional-then-document'
+          );
+          const elseDoc = element.shadowRoot.querySelector(
+            '.conditional-else-document'
+          );
+          assert.ok(ifDoc, 'If document is rendered');
+          assert.ok(thenDoc, 'Then document is rendered');
+          assert.ok(elseDoc, 'Else document is rendered');
+
+          const branchPropertyNames = async (nestedDoc) => {
+            let names = [];
+            await waitUntil(() => {
+              names = Array.from(
+                nestedDoc.shadowRoot.querySelectorAll('property-shape-document')
+              ).map((node) => node.propertyName);
+              return names.length > 0;
+            }, 'Nested branch property-shape-document did not render');
+            return names;
+          };
+
+          assert.include(
+            await branchPropertyNames(ifDoc),
+            'kind',
+            'If branch renders the "kind" property'
+          );
+          assert.include(
+            await branchPropertyNames(thenDoc),
+            'breed',
+            'Then branch renders the "breed" property'
+          );
+          assert.include(
+            await branchPropertyNames(elseDoc),
+            'indoor',
+            'Else branch renders the "indoor" property'
+          );
+        });
+
+        // @covers AC2
+        it('renders the If condition const value "dog"', async () => {
+          const data = await AmfLoader.loadType(
+            'PetKindFields',
+            item[1],
+            'oas31-webhooks'
+          );
+          element.amf = data[0];
+          element.type = data[1];
+          await aTimeout(0);
+          await nextFrame();
+
+          const ifDoc = element.shadowRoot.querySelector(
+            '.conditional-if-document'
+          );
+          assert.ok(ifDoc, 'If document is rendered');
+
+          let enumText = '';
+          await waitUntil(() => {
+            const propertyShapeDoc = ifDoc.shadowRoot.querySelector(
+              'property-shape-document'
+            );
+            if (!propertyShapeDoc) {
+              return false;
+            }
+            const rangeDoc = propertyShapeDoc.shadowRoot.querySelector(
+              'property-range-document'
+            );
+            if (!rangeDoc) {
+              return false;
+            }
+            const enumNode = rangeDoc.shadowRoot.querySelector('.enum-values');
+            if (!enumNode) {
+              return false;
+            }
+            enumText = enumNode.textContent;
+            return true;
+          }, 'If branch did not render enum values for the "kind" property');
+
+          assert.include(
+            enumText,
+            'dog',
+            'If branch shows the const value "dog"'
+          );
+        });
+
+        // @covers AC1
+        it('renders If and Else (no Then) without a silent blank', async () => {
+          const data = await AmfLoader.loadType(
+            'PetKindFields',
+            item[1],
+            'oas31-webhooks'
+          );
+          element.amf = data[0];
+          element.type = data[1];
+          await aTimeout(0);
+
+          // Reuse the real resolved PetKindFields branch shapes, but force a
+          // Then-less conditional to exercise the `{if, else}` path. Overriding
+          // the shape props after `_typeChanged` sticks because only an `amf`
+          // change re-runs detection (see ApiTypeDocument.updated()).
+          const { ifShape, elseShape } = element;
+          assert.isOk(ifShape, 'ifShape resolved from PetKindFields');
+          assert.isOk(elseShape, 'elseShape resolved from PetKindFields');
+          element.isConditional = true;
+          element.ifShape = ifShape;
+          element.thenShape = undefined;
+          element.elseShape = elseShape;
+          await element.updateComplete;
+          await nextFrame();
+
+          assert.ok(
+            element.shadowRoot.querySelector('.conditional-if-document'),
+            'If document renders'
+          );
+          assert.ok(
+            element.shadowRoot.querySelector('.conditional-else-document'),
+            'Else document renders'
+          );
+          assert.isNull(
+            element.shadowRoot.querySelector('.conditional-then-document'),
+            'Then document is absent when thenShape is undefined'
+          );
+        });
+      });
+
       describe('readOnly properties', () => {
         let element = /** @type ApiTypeDocument */ (null);
 
