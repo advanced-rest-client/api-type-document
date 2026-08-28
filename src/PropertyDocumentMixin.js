@@ -180,6 +180,12 @@ const mxFunction = (base) => {
       if (this._hasType(range, rs.ScalarShape)) {
         return this._computeScalarDataType(range);
       }
+      if (this._hasProperty(range, this.ns.w3.shacl.xone)) {
+        return 'One of';
+      }
+      if (this._hasProperty(range, this.ns.w3.shacl.or)) {
+        return 'Any of';
+      }
       if (this._hasType(range, rs.UnionShape)) {
         // Check if this is a nullable union (type | null)
         const nullableCheck = this._checkNullableUnion(range);
