@@ -104,6 +104,7 @@ class ApiDemo extends ApiDemoPage {
       ['product-order-minimal', 'Product Order Minimal'],
       ['grpc-test', 'GRPC test'],
       ['nested-examples-oas3', 'Nested Examples'],
+      ['W-24673104', 'W-24673104 - Nullable scalar description in array members'],
       ['nullable-test', 'Nullable Test (Comprehensive)'],
       ['nulleable', 'Nulleable test'],
       ['shopper-products', 'shopper-products'],
