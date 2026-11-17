@@ -618,10 +618,18 @@ export class PropertyShapeDocument extends PropertyDocumentMixin(LitElement) {
     if (!range) {
       return undefined;
     }
-    return /** @type string */ (this._getValue(
-      range,
-      this.ns.aml.vocabularies.core.description
-    ));
+    const key = this.ns.aml.vocabularies.core.description;
+    const description = /** @type string */ (this._getValue(range, key));
+    if (description) {
+      return description;
+    }
+    // A nullable scalar is a union of the scalar and `nil`; AMF keeps the
+    // description on the scalar member, not on the union.
+    const nullableCheck = this._checkNullableUnion(range);
+    if (nullableCheck) {
+      return /** @type string */ (this._getValue(nullableCheck.baseType, key));
+    }
+    return description;
   }
 
   /**
