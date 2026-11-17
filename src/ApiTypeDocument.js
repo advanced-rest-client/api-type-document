@@ -101,6 +101,8 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
        * True if given `type` is an array property
        */
       isArray: { type: Boolean },
+      /** True when given type is a positional OAS tuple. */
+      isTuple: { type: Boolean },
       /**
        * True if given `type` is an object property
        */
@@ -430,6 +432,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
         this.renderMediaSelector ||
         this.isObject ||
         this.isArray ||
+        this.isTuple ||
         this._renderMainExample
       );
     }
@@ -462,6 +465,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     }
     let isScalar = false;
     let isArray = false;
+    let isTuple = false;
     let isObject = false;
     let isUnion = false;
     let isAnd = false;
@@ -505,9 +509,9 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       isAnyOf = true;
       key = this._getAmfKey(this.ns.w3.shacl.or);
       this.anyOfTypes = this._computeTypes(type, key);
-    } else if (
-      this._hasType(type, shapesKey.ArrayShape)
-    ) {
+    } else if (this._hasType(type, shapesKey.TupleShape)) {
+      isTuple = true;
+    } else if (this._hasType(type, shapesKey.ArrayShape)) {
       isArray = true;
       const iKey = this._getAmfKey(shapesKey.items);
       let items = this._ensureArray(type[iKey]);
@@ -561,6 +565,7 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     }
     this.isScalar = isScalar;
     this.isArray = isArray;
+    this.isTuple = isTuple;
     this.isObject = isObject;
     this.isUnion = isUnion;
     this.isAnd = isAnd;
@@ -592,11 +597,13 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       this.renderMediaSelector || // Need to show the section for the media type selector
       isObject ||                 // Objects can generate examples automatically
       isArray ||                  // Arrays can generate examples automatically
+      isTuple ||                  // Tuples can generate examples automatically
       this._renderMainExample     // Has explicit examples
     );
     
     // Effective media type - use 'application/json' as default for objects and arrays without mediaType
-    this._exampleMediaType = this.mediaType || (isObject || isArray ? 'application/json' : undefined);
+    this._exampleMediaType = this.mediaType || (isObject || isArray || isTuple ? 'application/json' : undefined);
+
   }
 
   /**
@@ -1101,6 +1108,79 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
     return html``
   }
 
+  _tuplePropertiesTemplate() {
+    const items = this._tupleItems(this._resolvedType);
+    const closedItemsKey = this._getAmfKey(`${this.ns.aml.vocabularies.shapes.key}closedItems`);
+    const closedItems = this._getValue(this._resolvedType, closedItemsKey);
+    return html`<span>Tuple items:</span>
+      <div class="array-children">
+        ${items.map((item, index) => html`<section class="tuple-item">
+          <span class="tuple-item-index">Item ${index + 1}</span>
+          <property-shape-document
+            class="array-document"
+            .amf="${this.amf}"
+            .shape="${this._resolve(item)}"
+            parentTypeName="item ${index + 1}"
+            ?narrow="${this.narrow}"
+            ?noExamplesActions="${this.noExamplesActions}"
+            ?compatibility="${this.compatibility}"
+            .mediaType="${this.mediaType}"
+            ?graph="${this.graph}"
+          ></property-shape-document>
+        </section>`)}
+      </div>
+      ${closedItems
+        ? this._arrayPropertyTemplate('Additional items:', 'Not allowed', 'Additional array items are not allowed')
+        : ''}
+      ${this._arrayPropertiesTemplate()}`;
+  }
+
+  _tupleItems(tuple) {
+    const key = this._getAmfKey(this.ns.aml.vocabularies.shapes.items);
+    const sequenceValue = tuple[key];
+    const sequenceRef = this._ensureArray(sequenceValue)?.[0]?.['@id'];
+    const graph = this._flattenedAmf && this._flattenedAmf['@graph'];
+    const resolved = this._findById(graph, sequenceRef)
+      || this._findById(this._collectAmfNodes(this.amf), sequenceRef);
+    if (!resolved) {
+      return [];
+    }
+    const memberPrefix = this._getAmfKey(this.ns.w3.rdfSchema.key);
+    return Object.keys(resolved)
+      .filter((entry) => entry.startsWith(memberPrefix))
+      .sort((left, right) => Number(left.slice(memberPrefix.length)) - Number(right.slice(memberPrefix.length)))
+      .flatMap((entry) => this._ensureArray(resolved[entry]) || [])
+      .map((item) => this._resolve(item));
+  }
+
+  _collectAmfNodes(root) {
+    const nodes = [];
+    const seen = new WeakSet();
+    const visit = (value) => {
+      if (!value || typeof value !== 'object') {
+        return;
+      }
+      if (seen.has(value)) {
+        return;
+      }
+      seen.add(value);
+      if (Array.isArray(value)) {
+        value.forEach(visit);
+        return;
+      }
+      if (value['@id']) {
+        nodes.push(value);
+      }
+      Object.values(value).forEach(visit);
+    };
+    visit(root);
+    return nodes;
+  }
+
+  _tupleTemplate() {
+    return this._tuplePropertiesTemplate();
+  }
+
   /**
    * @return {TemplateResult} Templates for object properties
    */
@@ -1393,6 +1473,19 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
 
       ${this.isObject ? this._objectTemplate() : ''}
       ${this.isArray ? this._arrayTemplate() : ''}
+      ${this.isTuple ? this._tupleTemplate() : ''}
+      ${this.isTuple && !this.noMainExample && this._showExamples
+        ? html`<api-resource-example-document
+            class="examples"
+            .amf="${this.amf}"
+            .examples="${this._resolvedExampleType || this._resolvedType}"
+            .mediaType="${this._exampleMediaType}"
+            .typeName="${this.parentTypeName}"
+            ?compatibility="${this.compatibility}"
+            ?noActions="${this.noExamplesActions}"
+            ?rawOnly="${!this._hasMediaType}"
+          ></api-resource-example-document>`
+        : ''}
       ${this.isScalar
         ? html`<property-shape-document
             class="shape-document"

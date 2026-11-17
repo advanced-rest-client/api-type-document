@@ -168,7 +168,7 @@ describe('<api-type-document>', () => {
         });
 
         it('is accessible for ArrayShape type', async () => {
-          const data = await AmfLoader.loadType('ArrayType', item[1]);
+          const data = await AmfLoader.loadType('ArrayType', item[1], 'demo-api');
           element.amf = data[0];
           element._typeChanged(element._resolve(data[1]));
           await assert.isAccessible(element);
@@ -502,6 +502,12 @@ describe('<api-type-document>', () => {
           assert.ok(doc);
         });
 
+        it('preserves regular array item rendering', () => {
+          assert.isFalse(element.isTuple);
+          assert.isTrue(element.isArray);
+          assert.ok(element.shadowRoot.querySelector('property-shape-document.array-document'));
+        });
+
         it('Does not render scalar document', () => {
           const doc = element.shadowRoot.querySelector(
             'property-shape-document.shape-document'
@@ -554,6 +560,37 @@ describe('<api-type-document>', () => {
           assert.equal(properties[0].querySelector('.attribute-value').innerText, '1');
           assert.equal(properties[1].querySelector('.attribute-label').innerText, 'Maximum array length:');
           assert.equal(properties[1].querySelector('.attribute-value').innerText, '3');
+        });
+      });
+
+      describe('OAS 3.1 tuple type', () => {
+        let element = /** @type ApiTypeDocument */ (null);
+
+        beforeEach(async () => {
+          const data = await AmfLoader.loadType('Coordinates', item[1], 'W-24905746');
+          element = await basicFixture();
+          element.amf = data[0];
+          element.type = data[1];
+          await aTimeout(0);
+        });
+
+        it('renders tuple entries in declaration order with constraints', () => {
+          assert.isTrue(element.isTuple);
+          const entries = element.shadowRoot.querySelectorAll('.tuple-item');
+          assert.lengthOf(entries, 3);
+          assert.equal(entries[0].querySelector('property-shape-document').propertyDescription, 'Latitude');
+          assert.equal(entries[0].querySelector('property-shape-document')._getValue(entries[0].querySelector('property-shape-document').range, entries[0].querySelector('property-shape-document').ns.w3.shacl.minInclusive), -90);
+          assert.equal(entries[1].querySelector('property-shape-document').propertyDescription, 'Longitude');
+          assert.equal(entries[1].querySelector('property-shape-document')._getValue(entries[1].querySelector('property-shape-document').range, entries[1].querySelector('property-shape-document').ns.w3.shacl.minInclusive), -180);
+          assert.equal(entries[2].querySelector('property-shape-document').propertyDescription, 'Label');
+        });
+
+        it('renders array constraints and disallows additional items', () => {
+          const properties = element.shadowRoot.querySelectorAll('.property-attribute');
+          assert.isTrue(Array.from(properties).some((property) =>
+            property.innerText.includes('Additional items:') && property.innerText.includes('Not allowed')));
+          assert.isTrue(Array.from(properties).some((property) =>
+            property.innerText.includes('Minimum array length:') && property.innerText.includes('2')));
         });
       });
 

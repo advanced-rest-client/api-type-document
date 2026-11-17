@@ -92,6 +92,8 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
    * @attribute
    */
   isArray: boolean;
+  /** True when given type is a positional OAS tuple. */
+  isTuple: boolean;
   /**
    * True if given `type` is an object property
    * @attribute
@@ -305,6 +307,10 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
    * @returns Templates for object properties
    */
   _arrayTemplate(): TemplateResult;
+
+  _tupleTemplate(): TemplateResult;
+
+  _tupleItems(value: object): object[];
 
   /**
    * @returns Template for an union type
