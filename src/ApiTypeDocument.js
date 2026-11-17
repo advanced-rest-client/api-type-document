@@ -1137,8 +1137,11 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
 
   _tupleItems(tuple) {
     const key = this._getAmfKey(this.ns.aml.vocabularies.shapes.items);
-    const [sequence] = this._ensureArray(tuple[key]) || [];
-    const resolved = this._resolve(sequence);
+    const sequenceValue = tuple[key];
+    const sequenceRef = this._ensureArray(sequenceValue)?.[0]?.['@id'];
+    const graph = this._flattenedAmf && this._flattenedAmf['@graph'];
+    const resolved = this._findById(graph, sequenceRef)
+      || this._findById(this._collectAmfNodes(this.amf), sequenceRef);
     if (!resolved) {
       return [];
     }
@@ -1148,6 +1151,30 @@ export class ApiTypeDocument extends PropertyDocumentMixin(LitElement) {
       .sort((left, right) => Number(left.slice(memberPrefix.length)) - Number(right.slice(memberPrefix.length)))
       .flatMap((entry) => this._ensureArray(resolved[entry]) || [])
       .map((item) => this._resolve(item));
+  }
+
+  _collectAmfNodes(root) {
+    const nodes = [];
+    const seen = new WeakSet();
+    const visit = (value) => {
+      if (!value || typeof value !== 'object') {
+        return;
+      }
+      if (seen.has(value)) {
+        return;
+      }
+      seen.add(value);
+      if (Array.isArray(value)) {
+        value.forEach(visit);
+        return;
+      }
+      if (value['@id']) {
+        nodes.push(value);
+      }
+      Object.values(value).forEach(visit);
+    };
+    visit(root);
+    return nodes;
   }
 
   _tupleTemplate() {

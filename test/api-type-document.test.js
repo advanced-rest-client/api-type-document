@@ -168,7 +168,7 @@ describe('<api-type-document>', () => {
         });
 
         it('is accessible for ArrayShape type', async () => {
-          const data = await AmfLoader.loadType('ArrayType', item[1]);
+          const data = await AmfLoader.loadType('ArrayType', item[1], 'demo-api');
           element.amf = data[0];
           element._typeChanged(element._resolve(data[1]));
           await assert.isAccessible(element);
@@ -505,7 +505,7 @@ describe('<api-type-document>', () => {
         it('preserves regular array item rendering', () => {
           assert.isFalse(element.isTuple);
           assert.isTrue(element.isArray);
-          assert.include(element.shadowRoot.innerText, 'Array entry');
+          assert.ok(element.shadowRoot.querySelector('property-shape-document.array-document'));
         });
 
         it('Does not render scalar document', () => {
@@ -578,13 +578,11 @@ describe('<api-type-document>', () => {
           assert.isTrue(element.isTuple);
           const entries = element.shadowRoot.querySelectorAll('.tuple-item');
           assert.lengthOf(entries, 3);
-          assert.include(entries[0].innerText, 'Latitude');
-          assert.include(entries[0].innerText, 'Minimum value:');
-          assert.include(entries[0].innerText, '-90');
-          assert.include(entries[0].innerText, 'Maximum value:');
-          assert.include(entries[1].innerText, 'Longitude');
-          assert.include(entries[1].innerText, '-180');
-          assert.include(entries[2].innerText, 'Label');
+          assert.equal(entries[0].querySelector('property-shape-document').propertyDescription, 'Latitude');
+          assert.equal(entries[0].querySelector('property-shape-document')._getValue(entries[0].querySelector('property-shape-document').range, entries[0].querySelector('property-shape-document').ns.w3.shacl.minInclusive), -90);
+          assert.equal(entries[1].querySelector('property-shape-document').propertyDescription, 'Longitude');
+          assert.equal(entries[1].querySelector('property-shape-document')._getValue(entries[1].querySelector('property-shape-document').range, entries[1].querySelector('property-shape-document').ns.w3.shacl.minInclusive), -180);
+          assert.equal(entries[2].querySelector('property-shape-document').propertyDescription, 'Label');
         });
 
         it('renders array constraints and disallows additional items', () => {
