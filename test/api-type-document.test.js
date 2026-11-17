@@ -502,6 +502,12 @@ describe('<api-type-document>', () => {
           assert.ok(doc);
         });
 
+        it('preserves regular array item rendering', () => {
+          assert.isFalse(element.isTuple);
+          assert.isTrue(element.isArray);
+          assert.include(element.shadowRoot.innerText, 'Array entry');
+        });
+
         it('Does not render scalar document', () => {
           const doc = element.shadowRoot.querySelector(
             'property-shape-document.shape-document'
@@ -554,6 +560,39 @@ describe('<api-type-document>', () => {
           assert.equal(properties[0].querySelector('.attribute-value').innerText, '1');
           assert.equal(properties[1].querySelector('.attribute-label').innerText, 'Maximum array length:');
           assert.equal(properties[1].querySelector('.attribute-value').innerText, '3');
+        });
+      });
+
+      describe('OAS 3.1 tuple type', () => {
+        let element = /** @type ApiTypeDocument */ (null);
+
+        beforeEach(async () => {
+          const data = await AmfLoader.loadType('Coordinates', item[1], 'W-24905746');
+          element = await basicFixture();
+          element.amf = data[0];
+          element.type = data[1];
+          await aTimeout(0);
+        });
+
+        it('renders tuple entries in declaration order with constraints', () => {
+          assert.isTrue(element.isTuple);
+          const entries = element.shadowRoot.querySelectorAll('.tuple-item');
+          assert.lengthOf(entries, 3);
+          assert.include(entries[0].innerText, 'Latitude');
+          assert.include(entries[0].innerText, 'Minimum value:');
+          assert.include(entries[0].innerText, '-90');
+          assert.include(entries[0].innerText, 'Maximum value:');
+          assert.include(entries[1].innerText, 'Longitude');
+          assert.include(entries[1].innerText, '-180');
+          assert.include(entries[2].innerText, 'Label');
+        });
+
+        it('renders array constraints and disallows additional items', () => {
+          const properties = element.shadowRoot.querySelectorAll('.property-attribute');
+          assert.isTrue(Array.from(properties).some((property) =>
+            property.innerText.includes('Additional items:') && property.innerText.includes('Not allowed')));
+          assert.isTrue(Array.from(properties).some((property) =>
+            property.innerText.includes('Minimum array length:') && property.innerText.includes('2')));
         });
       });
 
